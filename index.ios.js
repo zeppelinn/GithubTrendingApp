@@ -1,18 +1,13 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
-  View,
-  Image
+  View
 } from 'react-native';
 
-import TabNavigator from 'react-native-tab-navigator'
+import Boy from './Boy';
+
+import {Navigator} from 'react-native-deprecated-custom-components';
 
 export default class GithubTrendingApp extends Component {
 
@@ -26,13 +21,13 @@ export default class GithubTrendingApp extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <TabNavigator>
+        {/* <TabNavigator>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab_popular'} 
-            selectedTitleStyle={{color:"red"}} /* 标签底部文字的样式 */
+            selectedTitleStyle={{color:"red"}} // 标签底部文字的样式
             title="热门"
             renderIcon={() => <Image style={styles.image} source={require('./res/images/ic_popular.png')} />}
-            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('./res/images/ic_popular.png')} />}/* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值 */
+            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('./res/images/ic_popular.png')} />}//* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值
             badgeText="1"
             onPress={() => this.setState({ selectedTab: 'tab_popular' })}>
             <View style={styles.page}>
@@ -72,7 +67,19 @@ export default class GithubTrendingApp extends Component {
 
             </View>
           </TabNavigator.Item>
-        </TabNavigator>
+        </TabNavigator> */}
+
+        <Navigator
+          initialRoute={{
+            component:Boy
+          }}
+          renderScene={(route, navigator) => {
+            let Component = route.component;
+            return <Component navigator={navigator} {...route.params} />
+          }}
+        >
+        </Navigator>
+
       </View>
     );
   }
@@ -89,7 +96,7 @@ const styles = StyleSheet.create({
   },
   page1: {
     flex:1,
-    backgroundColor:'green'
+    backgroundColor:'green',
   },
   image: {
     height:22,
