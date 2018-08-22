@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
-  View
+  View,
 } from 'react-native';
 
 import Boy from './Boy';
+
+import ListViewTest, {data} from './ListViewTest';
 
 import {Navigator} from 'react-native-deprecated-custom-components';
 
@@ -13,8 +15,9 @@ export default class GithubTrendingApp extends Component {
 
   constructor(props){
     super(props);
+
     this.state = {
-      selectedTab:"tab_popular"/* 初始化state，默认选中第一个tab */
+      selectedTab:"tab_popular",/* 初始化state，默认选中第一个tab */
     }
   }
 
@@ -67,7 +70,7 @@ export default class GithubTrendingApp extends Component {
 
             </View>
           </TabNavigator.Item>
-        </TabNavigator> */}
+        </TabNavigator> 
 
         <Navigator
           initialRoute={{
@@ -78,8 +81,10 @@ export default class GithubTrendingApp extends Component {
             return <Component navigator={navigator} {...route.params} />
           }}
         >
-        </Navigator>
+        </Navigator>*/}
+        <ListViewTest>
 
+        </ListViewTest>
       </View>
     );
   }
