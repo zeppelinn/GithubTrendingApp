@@ -5,6 +5,7 @@ import {
   Image,
 } from 'react-native';
 import TabNavigator from 'react-native-tab-navigator';
+import PopularPage from './PopularPage';
 
 export default class HomePage extends Component {
 
@@ -27,9 +28,7 @@ export default class HomePage extends Component {
             renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('../../res/images/ic_popular.png')} />}//* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值
             badgeText="1"
             onPress={() => this.setState({ selectedTab: 'tab_popular' })}>
-            <View style={styles.page}>
-
-            </View>
+            <PopularPage></PopularPage>
           </TabNavigator.Item>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab-trending'}
