@@ -9,6 +9,8 @@ import Boy from './Boy';
 
 import ListViewTest, {data} from './ListViewTest';
 
+import FetchTest from './FetchTest';
+
 import {Navigator} from 'react-native-deprecated-custom-components';
 
 export default class GithubTrendingApp extends Component {
@@ -81,10 +83,13 @@ export default class GithubTrendingApp extends Component {
             return <Component navigator={navigator} {...route.params} />
           }}
         >
-        </Navigator>*/}
+        </Navigator>
         <ListViewTest>
 
-        </ListViewTest>
+        </ListViewTest>*/}
+        <FetchTest>
+          
+        </FetchTest>
       </View>
     );
   }
