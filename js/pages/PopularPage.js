@@ -3,7 +3,8 @@ import {
     View,
     Text,
     TextInput,
-    ListView
+    ListView,
+    RefreshControl,
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
@@ -20,8 +21,18 @@ export default class PopularPage extends Component {
     render() {
         return (
         <View style={styles.container} >
-            <NavigationBar title={'最热'} style={{ backgroundColor:'#6495ed' }} />
+            <NavigationBar 
+                title={'最热'} 
+                statusBar={{
+                    backgroundColor:'#2196F3',
+                    barStyle:"light-content"
+                }}
+            />
             <ScrollableTabView 
+                tabBarBackgroundColor="#2196F3"
+                tabBarActiveTextColor="white"
+                tabBarInactiveTextColor="mintcream"
+                tabBarUnderlineStyle={{backgroundColor:"#e7e7e7", height:2}}
                 renderTabBar={() => <ScrollableTabBar/>}
             >
                 <PopularTab tabLabel="Java" >Java</PopularTab>
@@ -44,7 +55,8 @@ class PopularTab extends Component {
             result:"",
             dataSource:new ListView.DataSource({
                 rowHasChanged:(r1, r2) => r1!==r2
-            })
+            }),
+            isLoading:false,
         }
     }
 
@@ -53,26 +65,43 @@ class PopularTab extends Component {
     }
 
     getData = () => {
+        this.setState({
+            isLoading:true
+        })
         const url = `https://api.github.com/search/repositories?q=${this.props.tabLabel}&sort=star`
         this.dataRepository.fetchNetRepository(url)
             .then(result => {
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(result.items)
+                    dataSource: this.state.dataSource.cloneWithRows(result.items),
+                    isLoading:false,
                 })
             })
             .catch(error => {
                 this.setState({
-                    result:"error-->" + JSON.stringify(error)
+                    result:"error-->" + JSON.stringify(error),
+                    isLoading:false,
                 })
             })
     }
 
     render(){
         return (
-            <View>
+            <View style={{flex:1}} >
                 <ListView
                     dataSource={this.state.dataSource}
                     renderRow={(data) => <RepositoryCell data={data} />}
+                    /* 设置下拉刷新 */
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={this.state.isLoading}
+                            onRefresh={() => this.getData()}
+                            colors={['#2196F3']}
+                            tintColor={'#2196F3'}
+                            title={'Loading'}
+                            titleColor={'#2196F3'}
+                        />
+                    
+                    }
                 />
             </View>
         )

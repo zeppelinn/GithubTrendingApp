@@ -22,20 +22,20 @@ export default class HomePage extends Component {
         <TabNavigator>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab_popular'} 
-            selectedTitleStyle={{color:"red"}} // 标签底部文字的样式
+            selectedTitleStyle={{color:'#2196f3'}} // 标签底部文字的样式
             title="热门"
             renderIcon={() => <Image style={styles.image} source={require('../../res/images/ic_popular.png')} />}
-            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('../../res/images/ic_popular.png')} />}//* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值
+            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:'#2196f3'}]} source={require('../../res/images/ic_popular.png')} />}//* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值
             badgeText="1"
             onPress={() => this.setState({ selectedTab: 'tab_popular' })}>
             <PopularPage></PopularPage>
           </TabNavigator.Item>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab-trending'}
-            selectedTitleStyle={{color:"red"}}
+            selectedTitleStyle={{color:'#2196f3'}}
             title="趋势"
             renderIcon={() => <Image style={styles.image} source={require('../../res/images/ic_trending.png')} />}
-            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('../../res/images/ic_trending.png')} />}
+            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:'#2196f3'}]} source={require('../../res/images/ic_trending.png')} />}
             onPress={() => this.setState({ selectedTab: 'tab-trending' })}>
             <View style={styles.page1}>
 
@@ -43,10 +43,10 @@ export default class HomePage extends Component {
           </TabNavigator.Item>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab_favourite'}
-            selectedTitleStyle={{color:"red"}}
+            selectedTitleStyle={{color:'#2196f3'}}
             title="收藏"
             renderIcon={() => <Image style={styles.image} source={require('../../res/images/ic_trending.png')} />}
-            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('../../res/images/ic_trending.png')} />}
+            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:'#2196f3'}]} source={require('../../res/images/ic_trending.png')} />}
             onPress={() => this.setState({ selectedTab: 'tab_favourite' })}>
             <View style={styles.page1}>
 
@@ -54,10 +54,10 @@ export default class HomePage extends Component {
           </TabNavigator.Item>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab_my'}
-            selectedTitleStyle={{color:"red"}}
+            selectedTitleStyle={{color:'#2196f3'}}
             title="我的"
             renderIcon={() => <Image style={styles.image} source={require('../../res/images/ic_trending.png')} />}
-            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:"red"}]} source={require('../../res/images/ic_trending.png')} />}
+            renderSelectedIcon={() => <Image style={[styles.image, {tintColor:'#2196f3'}]} source={require('../../res/images/ic_trending.png')} />}
             onPress={() => this.setState({ selectedTab: 'tab_my' })}>
             <View style={styles.page1}>
 
