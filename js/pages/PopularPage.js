@@ -37,6 +37,10 @@ export default class PopularPage extends Component {
         }
     }
 
+    componentDidUpdate = () => {
+        
+    }
+
     renderTags = () => {
         var tags = [];
         for (let i = 0, len = this.state.dataArray.length; i < len; i++) {

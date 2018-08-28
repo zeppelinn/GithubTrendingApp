@@ -5,7 +5,8 @@ import {
     TouchableOpacity,
     Text,
     ScrollView,
-    Image
+    Image,
+    Alert
 } from 'react-native';
 import NavigationBar from '../../common/NavigationBar';
 import ViewUtils from '../util/ViewUtils'
@@ -32,8 +33,18 @@ export default class CustomTagsPage extends Component {
             this.props.navigator.pop();
             return ;
         }
-        this.languageDao.save(this.state.dataArray);
-        this.props.navigator.pop();
+        Alert.alert('提示', '是否保存此次修改？', 
+            [
+                {text:'不保存', onPress:() => {
+                    this.props.navigator.pop();
+                }},
+                {text:'保存', onPress:() => {
+                    this.languageDao.save(this.state.dataArray);
+                    this.props.navigator.pop();
+                }}
+            ]
+        )
+        
     }
 
     // 请求从数据库或keys.json文件中获取自定义标签类型
