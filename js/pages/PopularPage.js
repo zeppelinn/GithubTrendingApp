@@ -12,13 +12,55 @@ import HomePage from './HomePage';
 import DataRepository from '../expend/dao/DataRepository'
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import RepositoryCell from '../common/RepositoryCell'
+import LanguageDao, { FLAG_LANGUAGE } from '../expend/dao/LanguageDao';
 
 export default class PopularPage extends Component {
     constructor(props){
         super(props);
+        this.state = {
+            dataArray:[]
+        }
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+    }
+
+    componentDidMount = () => {
+        if(this.languageDao){
+            this.languageDao.fetch()
+                .then(result => {
+                    this.setState({
+                        dataArray:result
+                    })
+                })
+                .catch(error => {
+                    console.log('PopularPage 加载数据异常-->', error);
+                })
+        }
+    }
+
+    renderTags = () => {
+        var tags = [];
+        for (let i = 0, len = this.state.dataArray.length; i < len; i++) {
+            if (this.state.dataArray[i].checked) {
+                let name = this.state.dataArray[i].name;
+                tags.push(
+                    <PopularTab tabLabel={name} key={i} >{name}</PopularTab>
+                )
+            }
+        }
+        return tags;
     }
 
     render() {
+
+        let content = this.state.dataArray.length !== 0 ? <ScrollableTabView 
+                        tabBarBackgroundColor="#2196F3"
+                        tabBarActiveTextColor="white"
+                        tabBarInactiveTextColor="mintcream"
+                        tabBarUnderlineStyle={{backgroundColor:"#e7e7e7", height:2}}
+                        renderTabBar={() => <ScrollableTabBar/>}
+                    >
+                        {this.renderTags()}
+                    </ScrollableTabView> : null
         return (
         <View style={styles.container} >
             <NavigationBar 
@@ -28,18 +70,7 @@ export default class PopularPage extends Component {
                     barStyle:"light-content"
                 }}
             />
-            <ScrollableTabView 
-                tabBarBackgroundColor="#2196F3"
-                tabBarActiveTextColor="white"
-                tabBarInactiveTextColor="mintcream"
-                tabBarUnderlineStyle={{backgroundColor:"#e7e7e7", height:2}}
-                renderTabBar={() => <ScrollableTabBar/>}
-            >
-                <PopularTab tabLabel="Java" >Java</PopularTab>
-                <PopularTab tabLabel="Android" >Android</PopularTab>
-                <PopularTab tabLabel="iOS" >iOS</PopularTab>
-                <PopularTab tabLabel="React Native" >React Native</PopularTab>
-            </ScrollableTabView>
+            {content}
         </View>
         )
     }

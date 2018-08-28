@@ -1,4 +1,4 @@
-import HttpUtils from "../../../HttpUtils";
+import HttpUtils from '../../../HttpUtils'
 
 export default class DataRepository {
     fetchNetRepository(url){
