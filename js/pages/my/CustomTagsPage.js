@@ -20,6 +20,7 @@ export default class CustomTagsPage extends Component {
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.state = {
             dataArray:[],
+            deleteArray:[],
         }
         this.changeValues = [];
     }
@@ -51,8 +52,17 @@ export default class CustomTagsPage extends Component {
     loadTags = () => {
         this.languageDao.fetch()
             .then(result => {
+                let tempArray = [];
+                for (let i = 0; i < result.length; i++) {
+                    let item = {
+                        name: result[i].name,
+                        isChecked:false
+                    }
+                    tempArray.push(item);
+                }
                 this.setState({
-                    dataArray:result
+                    dataArray:result,
+                    deleteArray:tempArray
                 });
             })
             .catch(err => {
@@ -61,16 +71,39 @@ export default class CustomTagsPage extends Component {
     }
 
     saveTags = () => {
-        this.languageDao.save(this.state.dataArray)
+        if(this.changeValues.length === 0){
+            this.props.navigator.pop();
+            return ;
+        }
+        if(this.props.isRemoveTags){
+            let array = this.state.dataArray.slice(0);
+            for (let i = 0; i < this.changeValues.length; i++) {
+                for (let j = 0; j < array.length; j++) {
+                    console.log('array ->', array[j].name, ' change ->', this.changeValues[i].name);
+                    if(array[j].name === this.changeValues[i].name){
+                        this.setState({
+                            dataArray:this.state.dataArray.splice(j, 1)
+                        })
+                    }
+                }
+            }
+        }
+        this.languageDao.save(this.state.dataArray);
+        this.props.navigator.pop();
     }
 
     // 处理每个checkbox的点击事件，更新每个checkbox的isChecked状态
     onClickCheckBox = (data) => {
         data.checked = !data.checked;
+        this.props.isRemoveTags ? 
         this.setState({
             dataArray:this.updateItemInArray(data)
+        }) : 
+        this.setState({
+            deleteArray:this.updateItemInArray(data)
         })
         ArrayUtils.updateArray(this.changeValues, data)
+        console.log("this.changeValues.length -> ", this.changeValues.length);
     }
 
     updateItemInArray = (data) => {
@@ -81,6 +114,10 @@ export default class CustomTagsPage extends Component {
             }
         }
         return array;
+    }
+
+    getRenderItem = (index) => {
+        return this.props.isRemoveTags ? this.state.deleteArray[index] : this.state.dataArray[index];
     }
 
     // 渲染checkBox
@@ -118,8 +155,8 @@ export default class CustomTagsPage extends Component {
                 tags.push(
                     <View key={i}>
                         <View style={styles.item} >
-                            {this.renderCheckBox(this.state.dataArray[i])}
-                            {this.renderCheckBox(this.state.dataArray[i + 1])}
+                            {this.renderCheckBox(this.getRenderItem(i))}
+                            {this.renderCheckBox(this.getRenderItem(i + 1))}
                         </View>
                         <View style={styles.line} ></View>
                     </View>
@@ -128,8 +165,8 @@ export default class CustomTagsPage extends Component {
             tags.push(
                 <View key={len - 1}>
                     <View style={styles.item} >
-                        {len % 2 === 0 ? this.renderCheckBox(this.state.dataArray[len - 2]) : null}
-                        {this.renderCheckBox(this.state.dataArray[len - 1])}
+                        {len % 2 === 0 ? this.renderCheckBox(this.getRenderItem(len - 2)) : null}
+                        {this.renderCheckBox(this.getRenderItem(len - 1))}
                     </View>
                     <View style={styles.line} ></View>
                 </View>
@@ -138,15 +175,13 @@ export default class CustomTagsPage extends Component {
         }
     }
 
-
-
     render() {
         let rightButton = <TouchableOpacity
             onPress={() => this.saveTags()}
         >
             <View style={{marginRight:10}} >
                 <Text style={styles.title} >
-                    保存
+                    {this.props.isRemoveTags ? "删除" : "保存"}
                 </Text>
             </View>
         </TouchableOpacity>
@@ -154,7 +189,7 @@ export default class CustomTagsPage extends Component {
         return (
             <View style={styles.container} >
                 <NavigationBar
-                    title={'自定义标签'}
+                    title={this.props.isRemoveTags ? '删除自定义标签':"自定义标签"}
                     leftButton={ViewUtils.getLeftButton(() => {
                         this.onLeftButtonBack();
                     })}

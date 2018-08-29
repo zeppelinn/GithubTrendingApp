@@ -21,7 +21,7 @@ export default class MyPage extends Component {
                     onPress={() => {
                         this.props.navigator.push({
                             component:CustomTagsPage,
-                            params:{...this.props}
+                            params:{...this.props, isRemoveTags:false}
                         })
                     }}    
                 >
@@ -37,6 +37,17 @@ export default class MyPage extends Component {
                     }}    
                 >
                     标签排序
+                </Text>
+                <Text
+                    style={styles.tip}
+                    onPress={() => {
+                        this.props.navigator.push({
+                            component:CustomTagsPage,
+                            params:{...this.props, isRemoveTags:true}
+                        })
+                    }}    
+                >
+                    标签删除
                 </Text>
             </View>
         )

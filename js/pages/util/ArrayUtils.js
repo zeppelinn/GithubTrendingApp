@@ -30,4 +30,11 @@ export default class ArrayUtils {
         }
         return true;
     }
+
+    static remove = (array, item) => {
+        if(!(array && item)) return ;
+        for (let i = 0; i < array.length; i++) {
+            if(item === array[i]) array.splice(i, 1);
+        }
+    }
 }
