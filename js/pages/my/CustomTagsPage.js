@@ -179,7 +179,6 @@ const styles = StyleSheet.create({
     title:{
         fontSize:20,
         color:'white',
-        
     },
     line:{
         height:0.3,
