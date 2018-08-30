@@ -74,7 +74,7 @@ export default class DataRepository {
     }
 
     saveRepository = (url, items, callback) => {
-        if(url === null || items === null) return 
+        if(url === null || items === null) return ;
         console.log('saveRepository url->', url, ' items->', items);
         let wrapData = {items:items, update_date:new Date().getTime()};
         console.log('本地存储 ->', wrapData);
