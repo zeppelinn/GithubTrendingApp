@@ -44,7 +44,7 @@ export default class HomePage extends Component {
             renderSelectedIcon={() => <Image style={[styles.image, {tintColor:'#2196f3'}]} source={require('../../res/images/ic_popular.png')} />}//* style的属性不仅可以使用一个对象来赋值，还能用一个集合来赋值
             badgeText="1"
             onPress={() => this.setState({ selectedTab: 'tab_popular' })}>
-            <PopularPage></PopularPage>
+            <PopularPage {...this.props} ></PopularPage>
           </TabNavigator.Item>
           <TabNavigator.Item
             selected={this.state.selectedTab === 'tab-trending'}

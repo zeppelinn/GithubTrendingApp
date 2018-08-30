@@ -14,6 +14,7 @@ import DataRepository from '../expend/dao/DataRepository'
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import RepositoryCell from '../common/RepositoryCell'
 import LanguageDao, { FLAG_LANGUAGE } from '../expend/dao/LanguageDao';
+import RepositoryDetail from './RepositoryDetail';
 
 export default class PopularPage extends Component {
     constructor(props){
@@ -44,7 +45,7 @@ export default class PopularPage extends Component {
             if (this.state.dataArray[i].checked) {
                 let name = this.state.dataArray[i].name;
                 tags.push(
-                    <PopularTab tabLabel={name} key={i} >{name}</PopularTab>
+                    <PopularTab tabLabel={name} key={i} {...this.props} >{name}</PopularTab>
                 )
             }
         }
@@ -130,12 +131,22 @@ class PopularTab extends Component {
             })
     }
 
+    onSelected = (item) => {
+        this.props.navigator.push({
+            component:RepositoryDetail,
+            params:{
+                item:item,
+                ...this.props
+            }
+        })
+    }
+
     render(){
         return (
             <View style={{flex:1}} >
                 <ListView
                     dataSource={this.state.dataSource}
-                    renderRow={(data) => <RepositoryCell data={data} />}
+                    renderRow={(data) => <RepositoryCell data={data} key={data.id} onSelected={() => this.onSelected(data)} />}
                     /* 设置下拉刷新 */
                     refreshControl={
                         <RefreshControl
