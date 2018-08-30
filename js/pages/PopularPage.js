@@ -10,7 +10,7 @@ import {
 
 import NavigationBar from '../common/NavigationBar';
 import HomePage from './HomePage';
-import DataRepository from '../expend/dao/DataRepository'
+import DataRepository, {FLAG_STORAGE} from '../expend/dao/DataRepository'
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import RepositoryCell from '../common/RepositoryCell'
 import LanguageDao, { FLAG_LANGUAGE } from '../expend/dao/LanguageDao';
@@ -82,7 +82,7 @@ class PopularTab extends Component {
 
     constructor(props){
         super(props);
-        this.dataRepository = new DataRepository() //实例化数据请求对象
+        this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular) //实例化数据请求对象
 
         this.state={
             result:"",
