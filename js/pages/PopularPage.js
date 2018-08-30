@@ -5,6 +5,7 @@ import {
     TextInput,
     ListView,
     RefreshControl,
+    DeviceEventEmitter
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
@@ -35,10 +36,6 @@ export default class PopularPage extends Component {
                     console.log('PopularPage 加载数据异常-->', error);
                 })
         }
-    }
-
-    componentDidUpdate = () => {
-        
     }
 
     renderTags = () => {
@@ -104,11 +101,25 @@ class PopularTab extends Component {
             isLoading:true
         })
         const url = `https://api.github.com/search/repositories?q=${this.props.tabLabel}&sort=star`
-        this.dataRepository.fetchNetRepository(url)
+        this.dataRepository.fetchRepository(url)
             .then(result => {
+                let items = result && result.items ? result.items : result ? result : [];
                 this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(result.items),
+                    dataSource: this.state.dataSource.cloneWithRows(items),
                     isLoading:false,
+                })
+                if(result && result.update_date && !this.dataRepository.checkDate(result.update_date)){
+                    DeviceEventEmitter.emit('showToast', '数据过时');
+                    return this.dataRepository.fetchNetRepository(url);
+                }else{
+                    DeviceEventEmitter.emit('showToast', '显示本地数据');
+                }
+            })
+            .then(result => {
+                if(!result && result.length === 0) return ;
+                DeviceEventEmitter.emit('showToast', '显示网络数据');
+                this.setState({
+                    dataSource: this.state.dataSource.cloneWithRows(result),
                 })
             })
             .catch(error => {

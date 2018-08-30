@@ -10,11 +10,11 @@ import HomePage from './HomePage';
 export default class WelcomePage extends Component {
 
     componentDidMount = ()=> {
-        this.timer = setTimeout(() => {
+        // this.timer = setTimeout(() => {
             this.props.navigator.resetTo({
                 component:HomePage
             })
-        }, 2000);
+        // }, 2000);
     }
 
     componentWillUnmount = ()=> {
