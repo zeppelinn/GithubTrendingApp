@@ -240,7 +240,7 @@ var Popover = React.createClass({
     this.setState({isTransitioning: true});
   },
   _startDefaultAnimation({show, doneCallback}) {
-    var animDuration = 300;
+    var animDuration = 150;
     var values = this.state.defaultAnimatedValues;
     var translateOrigin = this.getTranslateOrigin();
 
@@ -350,7 +350,7 @@ var Popover = React.createClass({
             top: popoverOrigin.y,
             left: popoverOrigin.x,
             }, ...extendedStyles.popover]}>
-            <Animated.View style={arrowStyle}/>
+            {/* <Animated.View style={arrowStyle}/> */}
             <Animated.View ref='content' onLayout={this.measureContent} style={contentStyle}>
               {this.props.children}
             </Animated.View>
@@ -381,7 +381,7 @@ var styles = StyleSheet.create({
     left: 0,
     right: 0,
     position: 'absolute',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    // backgroundColor: 'rgba(0,0,0,0.5)',
   },
   popover: {
     backgroundColor: 'transparent',
