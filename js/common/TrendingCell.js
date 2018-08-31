@@ -28,7 +28,6 @@ export default class TrendingCell extends Component {
                         <View style={{flexDirection:'row', alignItems:'center'}} >
                             <Text style={styles.description} >Build by:</Text>
                             {this.props.data.contributors.map((result, i, arr) => {
-                                    console.log(this.props.data.contributors);
                                 return <Image 
                                     source={{uri:arr[i]}}
                                     style={{height:22, width:22}}
