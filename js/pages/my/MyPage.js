@@ -7,6 +7,7 @@ import {
 import NavigationBar from '../../common/NavigationBar';
 import CustomTagsPage from './CustomTagsPage';
 import SortKeyPage from './SortKeyPage';
+import {FLAG_LANGUAGE} from '../../expend/dao/LanguageDao'
 
 export default class MyPage extends Component {
     render() {
@@ -21,7 +22,7 @@ export default class MyPage extends Component {
                     onPress={() => {
                         this.props.navigator.push({
                             component:CustomTagsPage,
-                            params:{...this.props, isRemoveTags:false}
+                            params:{...this.props, isRemoveTags:false, flag:FLAG_LANGUAGE.flag_key}
                         })
                     }}    
                 >
@@ -43,11 +44,22 @@ export default class MyPage extends Component {
                     onPress={() => {
                         this.props.navigator.push({
                             component:CustomTagsPage,
-                            params:{...this.props, isRemoveTags:true}
+                            params:{...this.props, isRemoveTags:true, flag:FLAG_LANGUAGE.flag_key}
                         })
                     }}    
                 >
                     标签删除
+                </Text>
+                <Text
+                    style={styles.tip}
+                    onPress={() => {
+                        this.props.navigator.push({
+                            component:CustomTagsPage,
+                            params:{...this.props, isRemoveTags:true, flag:FLAG_LANGUAGE.flag_language, isRemoveTags:false}
+                        })
+                    }}    
+                >
+                    自定义语言
                 </Text>
             </View>
         )
