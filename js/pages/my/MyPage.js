@@ -33,11 +33,22 @@ export default class MyPage extends Component {
                     onPress={() => {
                         this.props.navigator.push({
                             component:SortKeyPage,
-                            params:{...this.props}
+                            params:{...this.props, flag:FLAG_LANGUAGE.flag_key}
                         })
                     }}    
                 >
                     标签排序
+                </Text>
+                <Text
+                    style={styles.tip}
+                    onPress={() => {
+                        this.props.navigator.push({
+                            component:SortKeyPage,
+                            params:{...this.props, flag:FLAG_LANGUAGE.flag_language}
+                        })
+                    }}    
+                >
+                    语言排序
                 </Text>
                 <Text
                     style={styles.tip}
