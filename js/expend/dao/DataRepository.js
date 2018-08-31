@@ -1,26 +1,54 @@
 import {
     AsyncStorage
 } from 'react-native';
+import GitHubTrending from 'GitHubTrending';
+
+export var FLAG_STORAGE = {flag_popular:'popular', flag_trending:'trending'}
 
 export default class DataRepository {
+
+    constructor(flag){
+        this.flag = flag;
+        if(this.flag === FLAG_STORAGE.flag_trending){
+            this.trending = new GitHubTrending();
+        }
+    }
+
     // 获取网络资源
     fetchNetRepository(url){
         return new Promise((resolve, reject) => {
-            fetch(url)
-                .then(response => response.json())
-                .then(result => {
-                    if(!result){
-                        reject(new Error('ResponseData is empty!'));
-                        return ;
-                    }
-                    resolve(result.items);
-                    this.saveRepository(url, result.items, (error) => {
-                        console.log('本地存储失败', error);
-                    });
-                })
-                .catch(error => {
-                    reject(error);
-                })
+            if(this.flag === FLAG_STORAGE.flag_trending){
+                this.trending.fetchTrending(url)
+                    .then(result => {
+                        if(!result){
+                            reject(new Error('ResponseData is empty!'));
+                            return ;
+                        }
+                        this.saveRepository(url, result, (error) => {
+                            console.log('本地存储失败', error);
+                        });
+                        resolve(result);
+                    })
+                    .catch(error => {
+
+                    })
+            }else{
+                fetch(url)
+                    .then(response => response.json())
+                    .then(result => {
+                        if(!result){
+                            reject(new Error('ResponseData is empty!'));
+                            return ;
+                        }
+                        resolve(result.items);
+                        this.saveRepository(url, result.items, (error) => {
+                            console.log('本地存储失败', error);
+                        });
+                    })
+                    .catch(error => {
+                        reject(error);
+                    })
+            }
         })
     }
 

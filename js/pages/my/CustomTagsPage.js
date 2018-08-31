@@ -17,7 +17,7 @@ import ArrayUtils from '../util/ArrayUtils';
 export default class CustomTagsPage extends Component {
     constructor(props){
         super(props);
-        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.languageDao = new LanguageDao(this.props.flag);
         this.state = {
             dataArray:[],
             deleteArray:[],
@@ -186,10 +186,12 @@ export default class CustomTagsPage extends Component {
             </View>
         </TouchableOpacity>
 
+        let title = this.props.isRemoveTags ? '删除自定义标签':"自定义标签";
+        title = this.props.flag === FLAG_LANGUAGE.flag_language ? '自定义语言' : title;
         return (
             <View style={styles.container} >
                 <NavigationBar
-                    title={this.props.isRemoveTags ? '删除自定义标签':"自定义标签"}
+                    title={title}
                     leftButton={ViewUtils.getLeftButton(() => {
                         this.onLeftButtonBack();
                     })}
