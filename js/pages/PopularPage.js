@@ -15,6 +15,7 @@ import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab
 import RepositoryCell from '../common/RepositoryCell'
 import LanguageDao, { FLAG_LANGUAGE } from '../expend/dao/LanguageDao';
 import RepositoryDetail from './RepositoryDetail';
+import ProjectModel from '../model/ProjectModel';
 
 export default class PopularPage extends Component {
     constructor(props){
@@ -97,6 +98,28 @@ class PopularTab extends Component {
         this.getData()
     }
 
+    // 更新project的item收藏状态
+    flushFavoriteState = () => {
+        let projectModels = [];
+        let items = this.items;
+        for (let i = 0; i < items.length; i++) {
+            projectModels.push(new ProjectModel(items[i], false));
+        }
+        this.updateState({
+            isLoading:false,
+            dataSource:this.getDataSource(projectModels)
+        })
+    }
+
+    getDataSource = (data) => {
+        return this.state.dataSource.cloneWithRows(data);
+    }
+
+    updateState = (dict) => {
+        if(!this) return ;
+        this.setState(dict);
+    }
+
     getData = () => {
         this.setState({
             isLoading:true
@@ -104,28 +127,19 @@ class PopularTab extends Component {
         const url = `https://api.github.com/search/repositories?q=${this.props.tabLabel}&sort=star`
         this.dataRepository.fetchRepository(url)
             .then(result => {
-                let items = result && result.items ? result.items : result ? result : [];
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                    isLoading:false,
-                })
+                this.items = result && result.items ? result.items : result ? result : [];
+                this.flushFavoriteState();
                 if(result && result.update_date && !this.dataRepository.checkDate(result.update_date)){
-                    DeviceEventEmitter.emit('showToast', '数据过时');
                     return this.dataRepository.fetchNetRepository(url);
-                }else{
-                    DeviceEventEmitter.emit('showToast', '显示本地数据');
                 }
             })
             .then(result => {
                 if(!result && result.length === 0) return ;
-                DeviceEventEmitter.emit('showToast', '显示网络数据');
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(result),
-                })
+                this.items = result;
+                this.flushFavoriteState();
             })
             .catch(error => {
-                this.setState({
-                    result:"error-->" + JSON.stringify(error),
+                this.updateState({
                     isLoading:false,
                 })
             })
@@ -141,12 +155,26 @@ class PopularTab extends Component {
         })
     }
 
+    // 处理收藏按钮的回调函数
+    onFavouriteIconPressed = (item, isFavorite) => {
+        
+    }
+
+    renderRow = (projectModel) => {
+        return <RepositoryCell 
+            projectModel={projectModel}
+            key={projectModel.item.id}
+            onSelected={() => this.onSelected(projectModel)}
+            onFavouriteIconPressed={(item, isFavorite) => this.onFavouriteIconPressed(item, isFavorite)}
+         />;
+    }
+
     render(){
         return (
             <View style={{flex:1}} >
                 <ListView
                     dataSource={this.state.dataSource}
-                    renderRow={(data) => <RepositoryCell data={data} key={data.id} onSelected={() => this.onSelected(data)} />}
+                    renderRow={(data) => this.renderRow(data)}
                     /* 设置下拉刷新 */
                     refreshControl={
                         <RefreshControl
