@@ -9,12 +9,42 @@ import {
 import HTMLView from 'react-native-htmlview';
 
 export default class TrendingCell extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            isFavorite:this.props.projectModel.isFavorite,
+            favouriteIcon: this.props.projectModel.isFavorite ? require('../../res/images/ic_star.png') : require('../../res/images/ic_unstar_transparent.png')
+        }
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        this.setFavoriteState(nextProps.projectModel.isFavorite)
+    }
+
+    setFavoriteState = (isFavorite) => {
+        this.setState({
+            isFavorite:isFavorite,
+            favouriteIcon: isFavorite ? require('../../res/images/ic_star.png') : require('../../res/images/ic_unstar_transparent.png')
+        })
+    }
+
+    onFavouriteIconPressed = () => {
+        this.setFavoriteState(!this.state.isFavorite);
+        this.props.onFavouriteIconPressed(this.props.projectModel.item, !this.state.isFavorite);
+    }
     render() {
-        let description = `<p>${this.props.data.description}</p>`
+
+        let item = this.props.projectModel.item ? this.props.projectModel.item : this.props.projectModel;
+        let favorIcon = <TouchableOpacity onPress={() => this.onFavouriteIconPressed()}>
+            <Image style={{width:22, height:22, tintColor:"#2196F3"}} source={this.state.favouriteIcon}/>
+        </TouchableOpacity>
+
+        let description = `<p>${this.props.projectModel.item.description}</p>`
+        console.log('author: ->', this.props.projectModel.item)
         return (
             <TouchableOpacity style={styles.container} onPress={() => this.props.onSelected()} >
                 <View style={styles.cell_container} >
-                    <Text style={styles.title} >{this.props.data.fullName}</Text>
+                    <Text style={styles.title} >{this.props.projectModel.item.fullName}</Text>
                     <HTMLView
                         value={description}
                         onLinkPress={(url) => {}}
@@ -23,11 +53,11 @@ export default class TrendingCell extends Component {
                             a:styles.description
                         }}
                     />
-                    <Text style={styles.description} >{this.props.data.meta}</Text>
+                    <Text style={styles.description} >{this.props.projectModel.item.meta}</Text>
                     <View style={{flexDirection:'row', justifyContent:'space-between'}} >
                         <View style={{flexDirection:'row', alignItems:'center'}} >
                             <Text style={styles.description} >Build by:</Text>
-                            {this.props.data.contributors.map((result, i, arr) => {
+                            {this.props.projectModel.item.contributors.map((result, i, arr) => {
                                 return <Image 
                                     source={{uri:arr[i]}}
                                     style={{height:22, width:22}}
@@ -37,7 +67,7 @@ export default class TrendingCell extends Component {
                             
                         </View>
                         <View style={{flexDirection:'row', alignItems:'center', justifyContent:'flex-end'}} >
-                            <Image style={{width:22, height:22}} source={require('../../res/images/ic_star.png')} />
+                            {favorIcon}
                         </View>
                     </View>
                 </View>

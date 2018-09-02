@@ -122,17 +122,14 @@ class PopularTab extends Component {
     }
 
     getFavoriteKeys = () => {
-        console.log('getFavoriteKeys');
         favoriteDao.getFavorKey()
             .then(keys => {
-                console.log('getFavoriteKeys--->', keys);
                 if(keys){
                     this.updateState({favoriteKeys:keys})
                 }
                 this.flushFavoriteState();
             })
             .catch(error => {
-                console.log('getFavoriteKeys error -> ', error);
                 this.flushFavoriteState();
             })
     }
@@ -172,14 +169,15 @@ class PopularTab extends Component {
             component:RepositoryDetail,
             params:{
                 projectModel:projectModel,
-                ...this.props
+                ...this.props,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_popular
             }
         })
     }
 
     // 处理收藏按钮的回调函数
     onFavouriteIconPressed = (item, isFavorite) => {
-        console.log('isFavorite -> ', isFavorite);
         if(isFavorite){
             favoriteDao.saveFavorItem(item.id.toString(), JSON.stringify(item))
         }else{
