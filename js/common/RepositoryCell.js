@@ -23,7 +23,7 @@ export default class RepositoryCell extends Component {
 
     setFavoriteState = (isFavorite) => {
         this.setState({
-            isFavorite,
+            isFavorite:isFavorite,
             favouriteIcon: isFavorite ? require('../../res/images/ic_star.png') : require('../../res/images/ic_unstar_transparent.png')
         })
     }

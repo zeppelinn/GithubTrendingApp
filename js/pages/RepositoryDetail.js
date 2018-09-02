@@ -12,9 +12,8 @@ import ViewUtils from './util/ViewUtils';
 export default class RepositoryDetail extends Component {
     constructor(props){
         super(props);
-        this.url = this.props.item.html_url ? this.props.item.html_url : `https://github.com/${this.props.item.fullName}`;
-        this.title = this.props.item.full_name ? this.props.item.full_name : this.props.item.fullName;
-        console.log(this.props.item);
+        this.url = this.props.projectModel.item.html_url ? this.props.projectModel.item.html_url : `https://github.com/${this.props.projectModel.item.fullName}`;
+        this.title = this.props.projectModel.item.full_name ? this.props.projectModel.item.full_name : this.props.projectModel.item.fullName;
         this.state = {
             url:this.url,
             title:this.title,
