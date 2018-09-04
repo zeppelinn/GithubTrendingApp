@@ -35,11 +35,13 @@ export default class RepositoryCell extends Component {
 
     render() {
         let item = this.props.projectModel.item ? this.props.projectModel.item : this.props.projectModel;
+        // if('string' === typeof(item)) item = JSON.parse(item);
+        console.log('cell item -----> ', typeof(item));
         let favorIcon = <TouchableOpacity onPress={() => this.onFavouriteIconPressed()}>
             <Image style={{width:22, height:22, tintColor:"#2196F3"}} source={this.state.favouriteIcon}/>
         </TouchableOpacity>
         return (
-            <TouchableOpacity style={styles.container} onPress={() => this.props.onSelected()} >
+            <TouchableOpacity style= {styles.container} onPress={() => this.props.onSelected()} >
                 <View style={styles.cell_container} >
                     <Text style={styles.title} >{item.full_name}</Text>
                     <Text style={styles.description} >{item.description}</Text>

@@ -20,6 +20,7 @@ export default class FavoriteDao{
      * */ 
     saveFavorItem = (key, value, callback) =>{
         console.log('save key -> ', key);
+        console.log('save value -> ', value);
         AsyncStorage.setItem(key, value, (error, result) => {
             if(!error){
                 this.updateFavorKeys(key, true);
@@ -72,7 +73,6 @@ export default class FavoriteDao{
     getFavorKey = () => {
         return new Promise((resolve, reject) => {
             AsyncStorage.getItem(this.favorKey, (error, res) => {
-                console.log('getFavorKey -> ', res);
                 if(!error){
                     try {
                         resolve(JSON.parse(res));
@@ -85,5 +85,34 @@ export default class FavoriteDao{
             })
         })
     }
+
+    /**
+     * 获取所有的用户收藏的项目
+     * 
+    */
+   getAllItems = () => {
+       return new Promise((resolve, reject) => {
+           this.getFavorKey().then(keys => {
+               var items = [];
+               if(keys){
+                   AsyncStorage.multiGet(keys, (err, storage) => {
+                        try {
+                            for (let i = 0; i < storage.length; i++) {
+                                items.push(storage[i][1]);
+                            }
+                            resolve(items)
+                        } catch (error) {
+                            reject(error);
+                        }
+                   })
+               }else{
+                   resolve(items);
+               }
+           })
+           .catch(error => {
+               reject(error);
+           })
+       })
+   }
 
 }
