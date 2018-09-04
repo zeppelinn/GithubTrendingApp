@@ -40,7 +40,6 @@ export default class TrendingCell extends Component {
         </TouchableOpacity>
 
         let description = `<p>${this.props.projectModel.item.description}</p>`
-        console.log('author: ->', this.props.projectModel.item)
         return (
             <TouchableOpacity style={styles.container} onPress={() => this.props.onSelected()} >
                 <View style={styles.cell_container} >

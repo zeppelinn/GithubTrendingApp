@@ -92,9 +92,6 @@ export default class TrendingPage extends Component {
     }
 
     onSeletTimeSpan = (tempTimeSpan) => {
-        console.log(tempTimeSpan.showText);
-        console.log(tempTimeSpan.searchText);
-        console.log(tempTimeSpan.titleText);
         this.setState({
             timeSpan:tempTimeSpan,
             isVisible:false
@@ -146,6 +143,7 @@ export default class TrendingPage extends Component {
 class TrendingTab extends Component {
     constructor(props){
         super(props);
+        this.isFavoriteChanged = false;
         this.state={
             result:"",
             dataSource:new ListView.DataSource({
@@ -157,13 +155,31 @@ class TrendingTab extends Component {
     }
 
     componentDidMount = () => {
+        console.log('trending page componentDidMount');
         this.getData(this.props.timeSpan, true)
+        this.listener = DeviceEventEmitter.addListener('favoriteChanged_trending', () => {
+            console.log('received emmit!!');
+            this.isFavoriteChanged = true;
+        })
     }
 
     // 组件在收到新的属性的时候调用
     componentWillReceiveProps = (nextProps) => {
+        console.log('trending page componentWillReceiveProps start ');
         if(nextProps.timeSpan !== this.props.timeSpan){
             this.getData(nextProps.timeSpan)
+        }
+        console.log('trending page componentWillReceiveProps end-->', this.isFavoriteChanged);
+        if(this.isFavoriteChanged){
+            console.log('trending page favor changed!!!!');
+            this.isFavoriteChanged = false;
+            this.getFavoriteKeys()
+        }
+    }
+
+    componentWillUnmount = () => {
+        if(this.listener){
+            this.listener.remove();
         }
     }
 
@@ -171,7 +187,6 @@ class TrendingTab extends Component {
     flushFavoriteState = () => {
         let projectModels = [];
         let items = this.items;
-        console.log('this.state.favoriteKeys->, ', this.state.favoriteKeys);
         for (let i = 0; i < items.length; i++) {
             projectModels.push(new ProjectModel(items[i], Utils.checkFavor(items[i], this.state.favoriteKeys)));
         }
@@ -208,7 +223,6 @@ class TrendingTab extends Component {
             isLoading:true
         })
         const url = `https://github.com/trending/${this.props.tabLabel}?${timeSpan.searchText}`
-        console.log(url);
         dataRepository.fetchRepository(url)
             .then(result => {
                 this.items = result && result.items ? result.items : result ? result : [];

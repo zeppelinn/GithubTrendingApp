@@ -87,7 +87,7 @@ class PopularTab extends Component {
     constructor(props){
         super(props);
         this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular) //实例化数据请求对象
-
+        this.isFavoriteChanged = false;
         this.state={
             result:"",
             dataSource:new ListView.DataSource({
@@ -99,7 +99,26 @@ class PopularTab extends Component {
     }
 
     componentDidMount = () => {
-        this.getData()
+        this.getData();
+        // 注册监听，监听收藏页面对收藏项目的修改
+        this.listener = DeviceEventEmitter.addListener('favoriteChanged_popular', () => {
+            console.log('popular page received emit')
+            this.isFavoriteChanged = true
+        })
+    }
+
+    // 在组件卸载之前销毁监听器
+    componentWillUnmount = () => {
+        if(this.listener){
+            this.listener.remove();
+        }
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if(this.isFavoriteChanged){
+            this.isFavoriteChanged = false;
+            this.getFavoriteKeys()
+        }
     }
 
     // 更新project的item收藏状态
