@@ -15,6 +15,11 @@ import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab
 import RepositoryCell from '../common/RepositoryCell'
 import LanguageDao, { FLAG_LANGUAGE } from '../expend/dao/LanguageDao';
 import RepositoryDetail from './RepositoryDetail';
+import ProjectModel from '../model/ProjectModel';
+import FavoriteDao from '../expend/dao/FavoriteDao';
+import Utils from '../pages/util/Utils';
+// 声明全局的favoriteDao，使得所有的tab都能够使用这个dao
+var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 
 export default class PopularPage extends Component {
     constructor(props){
@@ -66,9 +71,8 @@ export default class PopularPage extends Component {
         return (
         <View style={styles.container} >
             <NavigationBar 
-                title={'最热'} 
+                title={'热门'} 
                 statusBar={{
-                    backgroundColor:'#2196F3',
                     barStyle:"light-content"
                 }}
             />
@@ -83,18 +87,73 @@ class PopularTab extends Component {
     constructor(props){
         super(props);
         this.dataRepository = new DataRepository(FLAG_STORAGE.flag_popular) //实例化数据请求对象
-
+        this.isFavoriteChanged = false;
         this.state={
             result:"",
             dataSource:new ListView.DataSource({
                 rowHasChanged:(r1, r2) => r1!==r2
             }),
             isLoading:false,
+            favoriteKeys:[]
         }
     }
 
     componentDidMount = () => {
-        this.getData()
+        this.getData();
+        // 注册监听，监听收藏页面对收藏项目的修改
+        this.listener = DeviceEventEmitter.addListener('favoriteChanged_popular', () => {
+            console.log('popular page received emit')
+            this.isFavoriteChanged = true
+        })
+    }
+
+    // 在组件卸载之前销毁监听器
+    componentWillUnmount = () => {
+        if(this.listener){
+            this.listener.remove();
+        }
+    }
+
+    componentWillReceiveProps = (nextProps) => {
+        if(this.isFavoriteChanged){
+            this.isFavoriteChanged = false;
+            this.getFavoriteKeys()
+        }
+    }
+
+    // 更新project的item收藏状态
+    flushFavoriteState = () => {
+        let projectModels = [];
+        let items = this.items;
+        for (let i = 0; i < items.length; i++) {
+            projectModels.push(new ProjectModel(items[i], Utils.checkFavor(items[i], this.state.favoriteKeys)));
+        }
+        this.updateState({
+            isLoading:false,
+            dataSource:this.getDataSource(projectModels)
+        })
+    }
+
+    getDataSource = (data) => {
+        return this.state.dataSource.cloneWithRows(data);
+    }
+
+    getFavoriteKeys = () => {
+        favoriteDao.getFavorKey()
+            .then(keys => {
+                if(keys){
+                    this.updateState({favoriteKeys:keys})
+                }
+                this.flushFavoriteState();
+            })
+            .catch(error => {
+                this.flushFavoriteState();
+            })
+    }
+
+    updateState = (dict) => {
+        if(!this) return ;
+        this.setState(dict);
     }
 
     getData = () => {
@@ -104,41 +163,52 @@ class PopularTab extends Component {
         const url = `https://api.github.com/search/repositories?q=${this.props.tabLabel}&sort=star`
         this.dataRepository.fetchRepository(url)
             .then(result => {
-                let items = result && result.items ? result.items : result ? result : [];
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(items),
-                    isLoading:false,
-                })
+                this.items = result && result.items ? result.items : result ? result : [];
+                this.getFavoriteKeys();
                 if(result && result.update_date && !this.dataRepository.checkDate(result.update_date)){
-                    DeviceEventEmitter.emit('showToast', '数据过时');
                     return this.dataRepository.fetchNetRepository(url);
-                }else{
-                    DeviceEventEmitter.emit('showToast', '显示本地数据');
                 }
             })
             .then(result => {
                 if(!result && result.length === 0) return ;
-                DeviceEventEmitter.emit('showToast', '显示网络数据');
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithRows(result),
-                })
+                this.items = result;
+                this.getFavoriteKeys();
             })
             .catch(error => {
-                this.setState({
-                    result:"error-->" + JSON.stringify(error),
+                this.updateState({
                     isLoading:false,
                 })
             })
     }
 
-    onSelected = (item) => {
+    onSelected = (projectModel) => {
         this.props.navigator.push({
             component:RepositoryDetail,
             params:{
-                item:item,
-                ...this.props
+                projectModel:projectModel,
+                ...this.props,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_popular
             }
         })
+    }
+
+    // 处理收藏按钮的回调函数
+    onFavouriteIconPressed = (item, isFavorite) => {
+        if(isFavorite){
+            favoriteDao.saveFavorItem(item.id.toString(), JSON.stringify(item))
+        }else{
+            favoriteDao.removeFavorItem(item.id.toString());
+        }
+    }
+
+    renderRow = (projectModel) => {
+        return <RepositoryCell 
+            projectModel={projectModel}
+            key={projectModel.item.id}
+            onSelected={() => this.onSelected(projectModel)}
+            onFavouriteIconPressed={(item, isFavorite) => this.onFavouriteIconPressed(item, isFavorite)}
+         />;
     }
 
     render(){
@@ -146,7 +216,7 @@ class PopularTab extends Component {
             <View style={{flex:1}} >
                 <ListView
                     dataSource={this.state.dataSource}
-                    renderRow={(data) => <RepositoryCell data={data} key={data.id} onSelected={() => this.onSelected(data)} />}
+                    renderRow={(data) => this.renderRow(data)}
                     /* 设置下拉刷新 */
                     refreshControl={
                         <RefreshControl
