@@ -14,6 +14,7 @@ import {FLAG_LANGUAGE} from '../../expend/dao/LanguageDao'
 import { MORE_MENU } from '../../common/MoreMenu';
 import GlobalStyles from '../../../res/styles/GlobalStyles'
 import ViewUtils from '../util/ViewUtils';
+import AboutPage from '../about/AboutPage'
 
 export default class MyPage extends Component {
 
@@ -21,7 +22,7 @@ export default class MyPage extends Component {
         let TargetComponent, params = {...this.props, menuType:section}
         switch (section) {
             case MORE_MENU.ABOUT:
-                
+                TargetComponent = AboutPage;
                 break;
             case MORE_MENU.Author:
                 

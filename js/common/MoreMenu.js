@@ -10,4 +10,6 @@ export const MORE_MENU = {
     Author:'Author',
     ABOUT:'About',
     CUSTOM_THEME:'Custom Theme',
+    WEBSITE:'Website',
+    FEEDBACK:"Feedback"
 }
