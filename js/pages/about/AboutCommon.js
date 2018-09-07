@@ -14,14 +14,122 @@ import {MORE_MENU} from '../../common/MoreMenu';
 import ParallaxScrollView from 'react-native-parallax-scroll-view';
 import ViewUtils from '../util/ViewUtils';
 import GlobalStyles from '../../../res/styles/GlobalStyles'
+import FavoriteDao from '../../expend/dao/FavoriteDao';
+import { FLAG_STORAGE } from '../../expend/dao/DataRepository';
+import ProjectModel from '../../model/ProjectModel';
+import Utils from '../util/Utils';
+import RepositoryCell from '../../common/RepositoryCell';
+import RepositoryDetail from '../RepositoryDetail';
+import RepositoryUilts from '../../expend/dao/RepositoryUilts';
 
 export var FLAG_ABOUT = {flag_about:'about', flag_about_author:'about_author'}
 
 export default class AboutCommon{
-    constructor(props, updateState, flag) {
+    constructor(props, updateState, flag, config) {
         this.props = props;
         this.updateState = updateState;
         this.flag = flag;
+        this.config = config;
+        this.repositoryUtils = new RepositoryUilts(this);
+        this.repositories = [];
+        this.repositoryKeys = null;
+        this.favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
+    }
+
+    componentDidMount() {
+        if (this.flag === FLAG_ABOUT.flag_about) {
+            this.repositoryUtils.fetchResository(this.config.info.currentRepoUrl);
+        }else{
+            var urls = [];
+            var items = this.config.items;
+            for (let i = 0; i < array.length; i++) {
+                urls.push(this.config.info.url + items[i]);
+            }
+            this.repositoryUtils.fetchResositories(urls);
+        }
+    }
+
+    /**
+     * 通知数据发生改变
+     * @param items 发生改变的数据
+     */
+    onNotifiedDataChanged = (items) => {
+        console.log('onNotifiedDataChanged ---> ', items)
+        this.updateRepository(items);
+    }
+
+    /**
+     * 加入es6新特性
+     * 使用async修饰的函数是一个异步函数
+     * await关键字后面一般跟的是一个返回了Promise对象的函数表达式，它返回Promiser的resolve的对象
+     * 这样避免了链式调用的繁琐
+    */
+    async updateRepository(repositories){
+        if(repositories){
+            this.repositories = repositories;
+        }
+        if(!this.repositories) return ;
+        if(!this.repositoryKeys) {
+            this.repositoryKeys = await this.favoriteDao.getFavorKey();
+        }
+        let projectModels = [];
+        for (let i = 0; i < this.repositories.length; i++) {
+            projectModels.push({
+                isFavor:Utils.checkFavor(this.repositories[i], this.repositoryKeys ? this.repositoryKeys : []),
+                item:this.repositories[i].item ? this.repositories[i].item : this.repositories[i]
+            })
+        }
+        console.log('updateRepository ----> ', projectModels);
+        this.updateState({
+            projectModel:projectModels
+        })
+    }
+
+    onSelectedRepository = (projectModel) => {
+        var item = projectModel.items;
+        this.props.navigator.push({
+            title:item.full_name,
+            component:RepositoryDetail,
+            params:{
+                projectModel:projectModel,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_popular,
+                ...this.props
+            },
+        });
+    }
+
+    onFavouriteIconPressed = (item, isFavor) => {
+        if(isFavor){
+            this.favoriteDao.saveFavorItem(item.id.toString(), JSON.stringify(item));
+        }else{
+            this.favoriteDao.removeFavorItem(item.id.toString());
+        }
+    }
+
+    /**
+     * 创建项目视图
+     */
+    renderRepository = (projectModels) => {
+        console.log("about projectModels---->", projectModels);
+        if(!projectModels || projectModels.length === 0){
+            return null;
+        }else{
+            let views = [];
+            for (let i = 0; i < projectModels.length; i++) {
+                let projectModel =  projectModels[i];
+                console.log('renderRepository -----> id ', projectModel.item.items.id);
+                views.push(
+                    <RepositoryCell
+                        key={projectModel.item.items.id}
+                        projectModel={projectModel.item.items}
+                        onSelected={() => {}}
+                        onFavouriteIconPressed={() => {}}
+                    />
+                )
+            }
+            return views;
+        }
     }
 
     getParallaxRenderConfig = (params) => {

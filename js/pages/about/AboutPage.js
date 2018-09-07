@@ -1,23 +1,27 @@
 import React, { Component } from 'react'
 import {
-    Dimensions,
-    Image,
-    ListView,
-    PixelRatio,
-    StyleSheet,
-    Text,
     View,
-    Platform
+    Linking,
 } from 'react-native';
 import {MORE_MENU} from '../../common/MoreMenu';
 import ViewUtils from '../util/ViewUtils';
 import GlobalStyles from '../../../res/styles/GlobalStyles'
 import AboutCommon, {FLAG_ABOUT} from './AboutCommon';
+import WebViewPage from '../WebViewPage';
+import config from '../../../res/data/config.json';
 
 export default class AboutPage extends Component {
     constructor(props) {
         super(props);
-        this.aboutCommon = new AboutCommon(props, (dict) => this.updateState(dict), FLAG_ABOUT.flag_about)
+        this.state = {
+            projectModel:[]
+        }
+        this.aboutCommon = new AboutCommon(props, (dict) => this.updateState(dict), FLAG_ABOUT.flag_about, config)
+    }
+
+    componentDidMount() {
+        console.log('about page cdm');
+        this.aboutCommon.componentDidMount()
     }
 
     updateState = (dict) => {
@@ -31,22 +35,34 @@ export default class AboutPage extends Component {
                 
                 break;
             case MORE_MENU.WEBSITE:
-
+                TargetComponent = WebViewPage;
+                params.url = 'https://www.google.com';
+                params.title = 'Google';
                 break;
             case MORE_MENU.FEEDBACK:
-
+                var url = 'mailto://myheadisradio@gmail.com';
+                Linking.canOpenURL(url)
+                    .then(supported => {
+                        if(!supported){
+                            console.log('Can\' handle url:', url);
+                        }else{
+                            return Linking.openURL(url);
+                        }
+                    })
+                    .catch(err => console.log('open url failed:', err));
                 break;
         }
-        // if(TargetComponent){
-        //     this.props.navigator.push({
-        //         component:TargetComponent,
-        //         params:params
-        //     })
-        // }
+        if(TargetComponent){
+            this.props.navigator.push({
+                component:TargetComponent,
+                params:params
+            })
+        }
     }
 
     render() {
         let content = <View>
+            {this.aboutCommon.renderRepository(this.state.projectModel)}
             {ViewUtils.getSettingItems(() => this.onClick(MORE_MENU.WEBSITE), require("../../../res/images/ic_computer.png"), MORE_MENU.WEBSITE, {tintColor:'#2196F3'})}
             <View style={GlobalStyles.line} />
             {ViewUtils.getSettingItems(() => this.onClick(MORE_MENU.Author), require("../my/img/ic_insert_emoticon.png"), MORE_MENU.Author, {tintColor:'#2196F3'})}

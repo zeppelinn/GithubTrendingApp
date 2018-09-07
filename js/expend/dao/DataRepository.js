@@ -2,8 +2,9 @@ import {
     AsyncStorage
 } from 'react-native';
 import GitHubTrending from 'GitHubTrending';
+import Utils from '../../pages/util/Utils';
 
-export var FLAG_STORAGE = {flag_popular:'popular', flag_trending:'trending'}
+export var FLAG_STORAGE = {flag_popular:'popular', flag_trending:'trending', flag_my:'my'}
 
 export default class DataRepository {
 
@@ -34,14 +35,15 @@ export default class DataRepository {
                     })
             }else{
                 fetch(url)
-                    .then(response => response.json())
-                    .then(result => {
+                .then(response => response.json())
+                .then(result => {
                         if(!result){
                             reject(new Error('ResponseData is empty!'));
                             return ;
                         }
-                        resolve(result.items);
-                        this.saveRepository(url, result.items, (error) => {
+                        let items = this.flag === FLAG_STORAGE.flag_popular ? result.items : result;
+                        resolve(items);
+                        this.saveRepository(url, items, (error) => {
                             console.log('本地存储失败', error);
                         });
                     })
@@ -75,7 +77,7 @@ export default class DataRepository {
             this.fetchLocalRepository(url)
                 .then(result => {
                     if(result){
-                        console.log('获取本地数据成功');
+                        console.log('获取本地数据成功 ', result);
                         resolve(result);
                     }else{
                         console.log('本地数据为空');
@@ -107,17 +109,6 @@ export default class DataRepository {
         let wrapData = {items:items, update_date:new Date().getTime()};
         console.log('本地存储 ->', wrapData);
         AsyncStorage.setItem(url, JSON.stringify(wrapData), (error) => callback(error));
-    }
-
-    // 判断新的数据跟存储在数据库中的数据的时间戳，如果新数据的时间戳比本地数据的时间戳大超过4个小时，则说明本地数据已过期
-    checkDate = (longTime) => {
-        let currentDate = new Date();
-        let targetDate = new Date();
-        targetDate.setTime(longTime);
-        if(currentDate.getMonth() !== targetDate.getMonth()) return false;
-        if(currentDate.getDay() !== targetDate.getDay()) return false;
-        if(currentDate.getHours() - targetDate.getHours() > 4) return false;
-        return true;
     }
 
 }
