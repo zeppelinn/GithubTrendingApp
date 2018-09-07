@@ -58,7 +58,6 @@ export default class PopularPage extends Component {
     }
 
     render() {
-
         let content = this.state.dataArray.length !== 0 ? <ScrollableTabView 
                         tabBarBackgroundColor="#2196F3"
                         tabBarActiveTextColor="white"
@@ -128,6 +127,7 @@ class PopularTab extends Component {
         for (let i = 0; i < items.length; i++) {
             projectModels.push(new ProjectModel(items[i], Utils.checkFavor(items[i], this.state.favoriteKeys)));
         }
+        console.log('flushFavoriteState');
         this.updateState({
             isLoading:false,
             dataSource:this.getDataSource(projectModels)
@@ -165,7 +165,7 @@ class PopularTab extends Component {
             .then(result => {
                 this.items = result && result.items ? result.items : result ? result : [];
                 this.getFavoriteKeys();
-                if(result && result.update_date && !this.dataRepository.checkDate(result.update_date)){
+                if(result && result.update_date && Utils.checkDate(result.update_date)){
                     return this.dataRepository.fetchNetRepository(url);
                 }
             })

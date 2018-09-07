@@ -13,6 +13,7 @@ import ViewUtils from '../util/ViewUtils'
 import LanguageDao, {FLAG_LANGUAGE} from '../../expend/dao/LanguageDao';
 import CheckBox from 'react-native-check-box';
 import ArrayUtils from '../util/ArrayUtils';
+import {MORE_MENU} from '../../common/MoreMenu'
 
 export default class CustomTagsPage extends Component {
     constructor(props){
@@ -188,6 +189,7 @@ export default class CustomTagsPage extends Component {
 
         let title = this.props.isRemoveTags ? '删除自定义标签':"自定义标签";
         title = this.props.flag === FLAG_LANGUAGE.flag_language ? '自定义语言' : title;
+        title = this.props.menuType === MORE_MENU.REMOVE_KEY ? '标签移除' : title
         return (
             <View style={styles.container} >
                 <NavigationBar
