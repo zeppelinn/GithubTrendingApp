@@ -5,7 +5,9 @@ import {
     Platform,
     TouchableOpacity,
     Text,
-    ListView
+    ListView,
+    ActivityIndicator,
+    AsyncStorage,
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
@@ -30,7 +32,9 @@ export default class SearchPage extends Component {
             isLoading:false,
             dataSource:new ListView.DataSource({
                 rowHasChanged:(r1, r2) => r1 !== r2,
-            })
+            }),
+            searchHistory:[],
+            textInputValue:'',
         }
     }
 
@@ -48,7 +52,6 @@ export default class SearchPage extends Component {
         this.updateState({
             isLoading:true,
         })
-        console.log('url ===> ', this.getUrl(this.inputTextContent));
         fetch(this.getUrl(this.inputTextContent))
             .then(response => response.json())
             .then(result => {
@@ -108,15 +111,17 @@ export default class SearchPage extends Component {
     }
 
     updateState = (dict) => {
+        if(!this) return ;
         this.setState(dict);
     }
 
     onRightButtonClicked = () => {
         if (this.state.rightButtonText === '搜索') {
-            this.updateState({
-                rightButtonText:'取消'
-            })
-            this.loadData();
+            
+                this.updateState({
+                    rightButtonText:'取消'
+                })
+                this.loadData();
         }else{
             this.updateState({
                 rightButtonText:'搜索',
@@ -125,10 +130,100 @@ export default class SearchPage extends Component {
         }
     }
 
+    /**
+     * 从本地获取之前保存的搜索历史
+     */
+    fetchSearchHistory = () => {
+        return new Promise((resolve, reject) => {
+            AsyncStorage.getItem('search_history', (error, result) => {
+                if(!error){
+                    try {
+                        console.log('search history result ----> ', result);
+                        resolve(JSON.parse(result));
+                    } catch (e) {
+                        reject(e);
+                    }
+                }else{
+                    reject(error);
+                }
+            })
+        })
+    }
+
+    /**
+     * 获取搜索历史数据
+     */
+    getSearchHistory = () => {
+        console.log('renderSearchHistoryBubble');
+        this.fetchSearchHistory()
+            .then(response => {
+                if(response && response.length > 0){
+                    this.updateState({
+                        searchHistory:response
+                    })
+                }
+            })
+            .catch(error => {
+            });
+    }
+
+    /**
+     * 遍历搜索历史，返回搜索历史集合
+     */
+    searchHistoryBubbleListView = () => {
+        return this.state.searchHistory.map(item => (this.searchHistoryBubbleItem(item.tag)))
+    }
+
+    /**
+     * 返回单个搜索历史
+     */
+    searchHistoryBubbleItem = (item) => {
+        return <TouchableOpacity key={item} style={styles.bubbleContainer} onPress={() => {this.inputTextContent = item;this.onRightButtonClicked();this.updateState({textInputValue:item})}} >
+            <Text key={item} style={styles.bubbleItem}>
+                {item}
+            </Text>
+        </TouchableOpacity> 
+    }
+
+    /**
+     * 搜索历史
+     */
+    searchHistoryBubble = () => {
+        return (
+            <View>
+                <Text style={{marginTop:10,marginLeft:10, fontSize:15, color:"#848482"}} >搜索历史</Text>
+                <View style={{flexDirection:"row", flexWrap:"wrap", marginTop:5}} >
+                    {this.searchHistoryBubbleListView()}
+                </View>
+            </View>
+        )
+    }
+
+    updateSearchHistory = () => {
+        var [...arr] = this.state.searchHistory;
+        for (let i = 0; i < arr.length; i++) {
+            if(arr[i].tag.toLowerCase() === this.inputTextContent.toLowerCase()){
+                arr.splice(i, 1);
+                break;
+            }
+        }
+        arr.unshift({tag:this.inputTextContent});
+        this.updateState({
+            searchHistory:arr
+        })
+    }
+
     renderNavBar = () => {
         let leftButton = ViewUtils.getLeftButton(() => {this.onBack();this.refs.input.blur();})
-        let inputText = <TextInput ref="input" style={styles.inputText} onChangeText={text => this.inputTextContent = text}/>
-        let rightButton = <TouchableOpacity onPress={() => {this.refs.input.blur();this.onRightButtonClicked()}}>
+        let inputText = <TextInput defaultValue={this.state.textInputValue} ref="input" style={styles.inputText} onChangeText={text => this.inputTextContent = text}/>
+        let rightButton = <TouchableOpacity onPress={() => {
+                this.refs.input.blur();
+                if(this.inputTextContent && this.inputTextContent !== ''){
+                    console.log('enable search');
+                    this.onRightButtonClicked();
+                    this.updateSearchHistory();
+                }
+            }}>
             <View style={{marginRight:10}} >
                 <Text style={styles.title} >
                     {this.state.rightButtonText}
@@ -167,22 +262,40 @@ export default class SearchPage extends Component {
             onFavouriteIconPressed={(item, isFavorite) => ActionUtils.onFavorite(this.favoriteDao, item, isFavorite)}
          />;
     }
+    
+    componentWillMount = () => {
+        this.getSearchHistory();
+    }
+    
+
+    componentWillUnmount() {
+        AsyncStorage.setItem('search_history', JSON.stringify(this.state.searchHistory));
+    }
 
     render() {
         let statusBar = null;
         if(Platform.OS === 'ios'){
             statusBar = <View style={[styles.statusBar, {backgroundColor:"#2196f3"}]} />
         }
-        let listView = <ListView style={{marginTop:5}}
+        let listView = this.state.isLoading ? null : <ListView style={{marginTop:5}}
             dataSource={this.state.dataSource}
             renderRow={(data) => this.renderRow(data)}
         />
-        
+        let indicatorView = this.state.isLoading?
+            <ActivityIndicator
+                style={{alignItems:'center', justifyContent:'center', flex:1}}
+                animating={this.state.isLoading}
+                size={'large'}
+            />:this.searchHistoryBubble();
+        let parentView = <View style={{flex:1}} >
+            {indicatorView}
+            {listView}
+        </View>
         return (
         <View style={GlobalStyles.titleContainer} >
             {statusBar}
             {this.renderNavBar()}
-            {listView}
+            {parentView}
             <Toast ref={toast => this.toast = toast} />
         </View>
         )
@@ -217,5 +330,24 @@ const styles = {
         fontSize:18,
         color:'white',
         fontWeight:'500'
+    },
+    bubbleContainer:{
+        backgroundColor:"#E5E4E2",
+        marginTop:8,
+        marginLeft:10,
+        borderRadius:10,
+        alignItems:'center',
+        justifyContent:'center'
+    },
+    bubbleItem:{
+        backgroundColor:'transparent',
+        marginLeft:8,
+        marginRight:8,
+        marginTop:3,
+        marginBottom:3,
+        borderRadius:10,
+        alignItems:'center',
+        fontSize:15,
+        color:"#848482"
     }
 }

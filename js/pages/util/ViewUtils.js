@@ -5,7 +5,7 @@ import {
     TouchableOpacity,
     Image,
     TouchableHighlight,
-    StyleSheet
+    StyleSheet,
 } from 'react-native';
 
 export default class ViewUtils{
