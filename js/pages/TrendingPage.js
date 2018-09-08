@@ -22,6 +22,7 @@ import Popover from '../common/Popover';
 import ProjectModel from '../model/ProjectModel';
 import FavoriteDao from '../expend/dao/FavoriteDao';
 import Utils from '../pages/util/Utils'
+import ActionUtils from './util/ActionUtils';
 var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 var dataRepository = new DataRepository(FLAG_STORAGE.flag_trending) //实例化数据请求对象
 var timeSpanTextArray = [new TimeSpan('今天', '今 天', 'since=daily'), new TimeSpan('本周','本 周', 'since=weekly'), new TimeSpan('本月','本 月', 'since=monthly')];
@@ -243,35 +244,17 @@ class TrendingTab extends Component {
             })
     }
 
-    // 处理收藏按钮的回调函数
-    onFavouriteIconPressed = (item, isFavorite) => {
-        if(isFavorite){
-            favoriteDao.saveFavorItem(item.fullName, JSON.stringify(item))
-        }else{
-            favoriteDao.removeFavorItem(item.fullName);
-        }
-    }
-
-    onSelected = (projectModel) => {
-        var item = projectModel.item
-        this.props.navigator.push({
-            title:item.fullName,
-            component:RepositoryDetail,
-            params:{
-                projectModel:projectModel,
-                parentComponent:this,
-                flag:FLAG_STORAGE.flag_trending,
-                ...this.props
-            }
-        })
-    }
-
     renderRow = (projectModel) => {
         return <TrendingCell 
             projectModel={projectModel}
             key={projectModel.item.fullName}
-            onSelected={() => this.onSelected(projectModel)}
-            onFavouriteIconPressed={(item, isFavorite) => this.onFavouriteIconPressed(item, isFavorite)}
+            onSelected={() => ActionUtils.onRepositorySelected({
+                projectModel:projectModel,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_trending,
+                ...this.props
+            })}
+            onFavouriteIconPressed={(item, isFavorite) => ActionUtils.onFavorite(favoriteDao, item, isFavorite)}
         />
     }
 

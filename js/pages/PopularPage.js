@@ -5,7 +5,9 @@ import {
     TextInput,
     ListView,
     RefreshControl,
-    DeviceEventEmitter
+    DeviceEventEmitter,
+    TouchableOpacity,
+    Image
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
@@ -18,6 +20,8 @@ import RepositoryDetail from './RepositoryDetail';
 import ProjectModel from '../model/ProjectModel';
 import FavoriteDao from '../expend/dao/FavoriteDao';
 import Utils from '../pages/util/Utils';
+import SearchPage from './SearchPage';
+import ActionUtils from './util/ActionUtils';
 // 声明全局的favoriteDao，使得所有的tab都能够使用这个dao
 var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 
@@ -57,6 +61,23 @@ export default class PopularPage extends Component {
         return tags;
     }
 
+    renderRightButton = () => {
+        return <View>
+            <TouchableOpacity
+                onPress={() => {
+                    this.props.navigator.push({
+                        component:SearchPage,
+                        params:{...this.props}
+                    })
+                }}
+            >
+                <View>
+                    <Image style={{height:30, width:30, marginRight:10}} source={require('../../res/images/ic_search_white_48pt.png')} />
+                </View>
+            </TouchableOpacity>
+        </View>
+    }
+
     render() {
         let content = this.state.dataArray.length !== 0 ? <ScrollableTabView 
                         tabBarBackgroundColor="#2196F3"
@@ -74,6 +95,7 @@ export default class PopularPage extends Component {
                 statusBar={{
                     barStyle:"light-content"
                 }}
+                rightButton={this.renderRightButton()}
             />
             {content}
         </View>
@@ -181,33 +203,17 @@ class PopularTab extends Component {
             })
     }
 
-    onSelected = (projectModel) => {
-        this.props.navigator.push({
-            component:RepositoryDetail,
-            params:{
-                projectModel:projectModel,
-                ...this.props,
-                parentComponent:this,
-                flag:FLAG_STORAGE.flag_popular
-            }
-        })
-    }
-
-    // 处理收藏按钮的回调函数
-    onFavouriteIconPressed = (item, isFavorite) => {
-        if(isFavorite){
-            favoriteDao.saveFavorItem(item.id.toString(), JSON.stringify(item))
-        }else{
-            favoriteDao.removeFavorItem(item.id.toString());
-        }
-    }
-
     renderRow = (projectModel) => {
         return <RepositoryCell 
             projectModel={projectModel}
             key={projectModel.item.id}
-            onSelected={() => this.onSelected(projectModel)}
-            onFavouriteIconPressed={(item, isFavorite) => this.onFavouriteIconPressed(item, isFavorite)}
+            onSelected={() => ActionUtils.onRepositorySelected({
+                projectModel:projectModel,
+                ...this.props,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_popular
+            })}
+            onFavouriteIconPressed={(item, isFavorite) => ActionUtils.onFavorite(favoriteDao, item, isFavorite)}
          />;
     }
 

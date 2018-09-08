@@ -17,6 +17,7 @@ import ProjectModel from '../model/ProjectModel';
 import FavoriteDao from '../expend/dao/FavoriteDao';
 import TrendingCell from '../common/TrendingCell';
 import ArrayUtils from './util/ArrayUtils';
+import ActionUtils from './util/ActionUtils';
 
 export default class FavorPage extends Component {
     constructor(props){
@@ -106,40 +107,6 @@ class FavorTab extends Component {
         return this.state.dataSource.cloneWithRows(data);
     }
 
-    onSelected = (projectModel) => {
-        this.props.navigator.push({
-            component:RepositoryDetail,
-            params:{
-                projectModel:projectModel,
-                ...this.props,
-                parentComponent:this,
-                flag:FLAG_STORAGE.flag_popular
-            }
-        })
-    }
-
-   /**
-    * 处理收藏按钮的回调函数
-    * @param isFavorite boolean (false为取消收藏， true为添加收藏)
-   */
-    onFavouriteIconPressed = (item, isFavorite) => {
-        let key = this.props.flag === FLAG_STORAGE.flag_popular ? item.id.toString() : item.fullName;
-        if(isFavorite){
-            this.favoriteDao.saveFavorItem(key, JSON.stringify(item))
-        }else{
-            this.favoriteDao.removeFavorItem(key);
-        }
-        // 刷新取消收藏列表
-        this.updateCancelFavorItems(item, isFavorite);
-        if(this.cancelFavorItems.length > 0){
-            if(this.props.flag === FLAG_STORAGE.flag_popular){
-                DeviceEventEmitter.emit('favoriteChanged_popular');
-            }else{
-                DeviceEventEmitter.emit('favoriteChanged_trending');
-            }
-        }
-    }
-
     updateCancelFavorItems = (item, isFavorite) => {
         let index = this.cancelFavorItems.indexOf(item);
         if (isFavorite) {
@@ -154,13 +121,26 @@ class FavorTab extends Component {
     }
 
     renderRow = (projectModel) => {
-        console.log('favor page ---> ', projectModel);
         let CellComponent = this.props.flag === FLAG_STORAGE.flag_popular ? RepositoryCell : TrendingCell;
         return <CellComponent 
             projectModel={projectModel}
             key={this.props.flag === FLAG_STORAGE.flag_popular ? projectModel.item.id : projectModel.item.fullName}
-            onSelected={() => this.onSelected(projectModel)}
-            onFavouriteIconPressed={(item, isFavorite) => this.onFavouriteIconPressed(item, isFavorite)}
+            onSelected={() => ActionUtils.onRepositorySelected({
+                projectModel:projectModel,
+                ...this.props,
+                parentComponent:this,
+                flag:FLAG_STORAGE.flag_popular
+            })}
+            onFavouriteIconPressed={(item, isFavorite) => {
+                ActionUtils.onFavorite(this.favoriteDao, item, isFavorite);// 刷新取消收藏列表
+                this.updateCancelFavorItems(item, isFavorite);
+                if(this.cancelFavorItems.length > 0){
+                    if(this.props.flag === FLAG_STORAGE.flag_popular){
+                        DeviceEventEmitter.emit('favoriteChanged_popular');
+                    }else{
+                        DeviceEventEmitter.emit('favoriteChanged_trending');
+                    }
+                }}}
          />;
     }
 
