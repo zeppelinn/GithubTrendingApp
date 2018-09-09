@@ -12,20 +12,48 @@ import Toast, {DURATION} from 'react-native-easy-toast'
 import FavorPage from './FavorPage'
 import TrendingPage from './TrendingPage';
 
-export default class HomePage extends Component {
+export const ACTION_HOME = {A_SHOW_TOAST:'showToast', A_RESTART:'restart'}
+export const FLAG_TAB = {
+  flag_popularTab:'tab_popular',
+  flag_trendingTab:'tab_trending',
+  flag_favouriteTab:'tab_favourite',
+  flag_myTab:'tab_my',
+}
 
+export default class HomePage extends Component {
   constructor(props){
     super(props);
+    let selectedTab = this.props.selectedTab ? this.props.selectedTab : 'tab_popular'
     this.state = {
-      selectedTab:"tab_popular",/* 初始化state，默认选中第一个tab */
+      selectedTab: selectedTab,/* 初始化state，默认选中第一个tab */
+    }
+  }
+
+  onRestart = (selectedTab) => {
+    this.props.navigator.resetTo({
+      component:HomePage,
+      params:{
+        ...this.props,
+        selectedTab:selectedTab
+      }
+    })
+  }
+
+  onAction = (action, params) => {
+    switch (action) {
+      case ACTION_HOME.A_RESTART:
+        console.log('收到通知');
+        this.onRestart(params.selectedTab);
+        break;
+      case ACTION_HOME.A_SHOW_TOAST:
+        this.toast.show(params.text, DURATION.LENGTH_SHORT);
+        break;
     }
   }
 
   componentDidMount = () => {
     // 注册通知
-    this.listener = DeviceEventEmitter.addListener('showToast', (text) => {
-      this.toast.show(text, DURATION.LENGTH_SHORT);
-    });
+    this.listener = DeviceEventEmitter.addListener('ACTION_HOME', (action, params) => this.onAction(action, params));
   }
 
   componentWillUnmount = () => {
