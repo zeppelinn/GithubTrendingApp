@@ -24,6 +24,7 @@ import RepositoryDetail from './RepositoryDetail';
 import ActionUtils from './util/ActionUtils';
 import LanguageDao, {FLAG_LANGUAGE} from '../expend/dao/LanguageDao';
 import { ACTION_HOME } from './HomePage';
+import makeCancelable from './util/Cancelable';
 
 export default class SearchPage extends Component {
     constructor(props){
@@ -59,7 +60,8 @@ export default class SearchPage extends Component {
         this.updateState({
             isLoading:true,
         })
-        fetch(this.getUrl(this.inputTextContent))
+        this.cancelable = makeCancelable(fetch(this.getUrl(this.inputTextContent)))
+        this.cancelable.promise
             .then(response => response.json())
             .then(result => {
                 if(!this || !result || !result.items || result.items.length === 0){
@@ -133,7 +135,6 @@ export default class SearchPage extends Component {
 
     onRightButtonClicked = () => {
         if (this.state.rightButtonText === '搜索') {
-            
                 this.updateState({
                     rightButtonText:'取消'
                 })
@@ -143,6 +144,7 @@ export default class SearchPage extends Component {
                 rightButtonText:'搜索',
                 isLoading:false
             })
+            this.cancelable.cancel()
         }
     }
 

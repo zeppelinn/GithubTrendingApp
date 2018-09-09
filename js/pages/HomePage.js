@@ -43,7 +43,7 @@ export default class HomePage extends Component {
     switch (action) {
       case ACTION_HOME.A_RESTART:
         console.log('收到通知');
-        this.onRestart();
+        this.onRestart(params.selectedTab);
         break;
       case ACTION_HOME.A_SHOW_TOAST:
         this.toast.show(params.text, DURATION.LENGTH_SHORT);
