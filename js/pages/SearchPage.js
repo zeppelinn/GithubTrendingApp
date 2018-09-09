@@ -8,6 +8,7 @@ import {
     ListView,
     ActivityIndicator,
     AsyncStorage,
+    DeviceEventEmitter
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
@@ -22,6 +23,7 @@ import RepositoryCell from '../common/RepositoryCell';
 import RepositoryDetail from './RepositoryDetail';
 import ActionUtils from './util/ActionUtils';
 import LanguageDao, {FLAG_LANGUAGE} from '../expend/dao/LanguageDao';
+import { ACTION_HOME } from './HomePage';
 
 export default class SearchPage extends Component {
     constructor(props){
@@ -29,6 +31,7 @@ export default class SearchPage extends Component {
         this.favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
         this.favoriteKeys = [];
         this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
+        this.keyHasChanged = false;
         this.state = {
             rightButtonText:'搜索',
             isLoading:false,
@@ -281,6 +284,7 @@ export default class SearchPage extends Component {
      */
     async initKeys(){
         this.keys = await this.languageDao.fetch();
+        console.log('keys =====> ', this.keys);
     }
 
     /**
@@ -311,6 +315,7 @@ export default class SearchPage extends Component {
             this.updateState({
                 showBottomButton:false
             })
+            this.keyHasChanged = true;
         }
     }
 
@@ -321,10 +326,13 @@ export default class SearchPage extends Component {
     componentWillMount = () => {
         this.getSearchHistory();
     }
-    
 
     componentWillUnmount() {
         AsyncStorage.setItem('search_history', JSON.stringify(this.state.searchHistory));
+        if(this.keyHasChanged){
+            console.log('发送通知');
+            DeviceEventEmitter.emit('ACTION_HOME', ACTION_HOME.A_RESTART);
+        }
     }
 
     render() {
