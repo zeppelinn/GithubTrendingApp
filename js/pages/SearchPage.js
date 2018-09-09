@@ -21,20 +21,24 @@ import Utils from './util/Utils';
 import RepositoryCell from '../common/RepositoryCell';
 import RepositoryDetail from './RepositoryDetail';
 import ActionUtils from './util/ActionUtils';
+import LanguageDao, {FLAG_LANGUAGE} from '../expend/dao/LanguageDao';
 
 export default class SearchPage extends Component {
     constructor(props){
         super(props);
         this.favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
         this.favoriteKeys = [];
+        this.languageDao = new LanguageDao(FLAG_LANGUAGE.flag_key);
         this.state = {
             rightButtonText:'搜索',
             isLoading:false,
+            isFinished:false,
             dataSource:new ListView.DataSource({
                 rowHasChanged:(r1, r2) => r1 !== r2,
             }),
             searchHistory:[],
             textInputValue:'',
+            showBottomButton:false,
         }
     }
 
@@ -63,8 +67,17 @@ export default class SearchPage extends Component {
                     })
                     return ;
                 }
+                this.updateState({
+                    isFinished:true,
+                })
                 this.items = result.items;
                 this.getFavoriteKeys();
+                console.log('start check');
+                if(!this.checkRepeatKeys(this.inputTextContent)){
+                    this.updateState({
+                        showBottomButton:true,
+                    })
+                }
             })
             .catch(error => {
                 this.updateState({
@@ -178,7 +191,7 @@ export default class SearchPage extends Component {
      * 返回单个搜索历史
      */
     searchHistoryBubbleItem = (item) => {
-        return <TouchableOpacity key={item} style={styles.bubbleContainer} onPress={() => {this.inputTextContent = item;this.onRightButtonClicked();this.updateState({textInputValue:item})}} >
+        return <TouchableOpacity key={item} style={styles.bubbleContainer} onPress={() => {this.inputTextContent = item;this.refs.input.blur();this.onRightButtonClicked();this.updateState({textInputValue:item})}} >
             <Text key={item} style={styles.bubbleItem}>
                 {item}
             </Text>
@@ -215,7 +228,7 @@ export default class SearchPage extends Component {
 
     renderNavBar = () => {
         let leftButton = ViewUtils.getLeftButton(() => {this.onBack();this.refs.input.blur();})
-        let inputText = <TextInput defaultValue={this.state.textInputValue} ref="input" style={styles.inputText} onChangeText={text => this.inputTextContent = text}/>
+        let inputText = <TextInput defaultValue={this.state.textInputValue} ref="input" style={styles.inputText} onChangeText={text => {this.inputTextContent = text;if(!text || text === ''){this.refs.input.blur();this.updateState({isFinished:false, isLoading:false})}}}/>
         let rightButton = <TouchableOpacity onPress={() => {
                 this.refs.input.blur();
                 if(this.inputTextContent && this.inputTextContent !== ''){
@@ -262,6 +275,48 @@ export default class SearchPage extends Component {
             onFavouriteIconPressed={(item, isFavorite) => ActionUtils.onFavorite(this.favoriteDao, item, isFavorite)}
          />;
     }
+
+    /**
+     * 使用async和await来异步获取本地标签
+     */
+    async initKeys(){
+        this.keys = await this.languageDao.fetch();
+    }
+
+    /**
+     * 检查当前搜索的标签是否已经在本地保存
+     */
+    checkRepeatKeys = (key) => {
+        for (let i = 0; i < this.keys.length; i++) {
+            if(key.toLowerCase() === this.keys[i].name.toLowerCase()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    saveKey = () => {
+        let key = this.inputTextContent;
+        if(this.checkRepeatKeys(key)){
+            this.toast.show(key + "已经保存", DURATION.LENGTH_SHORT);
+        }else{
+            key = {
+                "path":key,
+                "name":key,
+                "checked":true
+            };
+            this.keys.unshift(key);
+            this.languageDao.save(this.keys);
+            this.toast.show("保存成功", DURATION.LENGTH_SHORT);
+            this.updateState({
+                showBottomButton:false
+            })
+        }
+    }
+
+    componentDidMount() {
+        this.initKeys();
+    }
     
     componentWillMount = () => {
         this.getSearchHistory();
@@ -281,21 +336,33 @@ export default class SearchPage extends Component {
             dataSource={this.state.dataSource}
             renderRow={(data) => this.renderRow(data)}
         />
-        let indicatorView = this.state.isLoading?
+        let indicatorView = this.state.isFinished ? null:( this.state.isLoading?
             <ActivityIndicator
                 style={{alignItems:'center', justifyContent:'center', flex:1}}
                 animating={this.state.isLoading}
                 size={'large'}
-            />:this.searchHistoryBubble();
+            />:this.searchHistoryBubble());
         let parentView = <View style={{flex:1}} >
             {indicatorView}
             {listView}
         </View>
+        let bottomButton = this.state.showBottomButton ? 
+            <TouchableOpacity
+                onPress={() => this.saveKey(this.inputTextContent)}
+                style={[styles.bottom, {backgroundColor:"#2196f3"}]}
+            >
+                <View style={{justifyContent:'center', }} >
+                    <Text style={styles.title} >
+                        添加标签
+                    </Text>
+                </View>
+            </TouchableOpacity> : null;
         return (
         <View style={GlobalStyles.titleContainer} >
             {statusBar}
             {this.renderNavBar()}
             {parentView}
+            {bottomButton}
             <Toast ref={toast => this.toast = toast} />
         </View>
         )
@@ -349,5 +416,16 @@ const styles = {
         alignItems:'center',
         fontSize:15,
         color:"#848482"
+    },
+    bottom:{
+        alignItems:'center',
+        justifyContent:'center',
+        opacity:0.8,
+        height:40,
+        position:'absolute',
+        left:140,
+        top:GlobalStyles.window_height - 45,
+        right:140,
+        borderRadius:5
     }
 }

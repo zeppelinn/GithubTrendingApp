@@ -13,7 +13,6 @@ import FavorPage from './FavorPage'
 import TrendingPage from './TrendingPage';
 
 export default class HomePage extends Component {
-
   constructor(props){
     super(props);
     this.state = {
