@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
-import HomePage from './HomePage';
+import HomePage, { FLAG_TAB } from './HomePage';
 import DataRepository, {FLAG_STORAGE} from '../expend/dao/DataRepository'
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import RepositoryCell from '../common/RepositoryCell'
@@ -22,6 +22,8 @@ import FavoriteDao from '../expend/dao/FavoriteDao';
 import Utils from '../pages/util/Utils';
 import SearchPage from './SearchPage';
 import ActionUtils from './util/ActionUtils';
+import MoreMenu, {MORE_MENU} from '../common/MoreMenu';
+import ViewUtils from './util/ViewUtils';
 // 声明全局的favoriteDao，使得所有的tab都能够使用这个dao
 var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_popular);
 
@@ -62,7 +64,7 @@ export default class PopularPage extends Component {
     }
 
     renderRightButton = () => {
-        return <View>
+        return <View style={{flexDirection:'row'}} >
             <TouchableOpacity
                 onPress={() => {
                     this.props.navigator.push({
@@ -72,10 +74,21 @@ export default class PopularPage extends Component {
                 }}
             >
                 <View>
-                    <Image style={{height:30, width:30, marginRight:10}} source={require('../../res/images/ic_search_white_48pt.png')} />
+                    <Image style={{height:30, width:30, marginTop:5}} source={require('../../res/images/ic_search_white_48pt.png')} />
                 </View>
             </TouchableOpacity>
+            {ViewUtils.getMoreButton(() => this.refs.moreMenu.open())}
         </View>
+    }
+
+    renderMoreMenuView = () => {
+        let params = {...this.props, fromPage:FLAG_TAB.flag_popularTab}
+        return <MoreMenu
+            ref='moreMenu'
+            {...params}
+            menus={[MORE_MENU.CUSTOM_KEY, MORE_MENU.SORT_KEY, MORE_MENU.REMOVE_KEY, MORE_MENU.CUSTOM_THEME]}
+            anchorView={() => this.refs.moreMenuButton}
+        />
     }
 
     render() {
@@ -98,6 +111,7 @@ export default class PopularPage extends Component {
                 rightButton={this.renderRightButton()}
             />
             {content}
+            {this.renderMoreMenuView()}
         </View>
         )
     }

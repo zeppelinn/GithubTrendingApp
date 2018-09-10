@@ -2,13 +2,13 @@
 
 import React, { PropTypes } from 'react';
 import {
-  StyleSheet,
-  Dimensions,
-  Animated,
-  Text,
-  TouchableWithoutFeedback,
-  View,
-  Easing
+    StyleSheet,
+    Dimensions,
+    Animated,
+    Text,
+    TouchableWithoutFeedback,
+    View,
+    Easing
 } from 'react-native';
 
 var noop = () => {};
@@ -37,6 +37,7 @@ var Popover = React.createClass({
   propTypes: {
     isVisible: PropTypes.bool,
     onClose: PropTypes.func,
+    contentStyle:View.propTypes.style,
   },
   getInitialState() {
     return {
@@ -68,7 +69,7 @@ var Popover = React.createClass({
 
     var isAwaitingShow = this.state.isAwaitingShow;
     this.setState(Object.assign(geom,
-      {contentSize, isAwaitingShow: undefined}), () => {
+        {contentSize, isAwaitingShow: undefined}), () => {
       // Once state is set, call the showHandler so it can access all the geometry
       // from the state
       isAwaitingShow && this._startAnimation({show: true});
@@ -99,9 +100,9 @@ var Popover = React.createClass({
   },
   computeTopGeometry({displayArea, fromRect, contentSize, arrowSize}) {
     var popoverOrigin = new Point(
-      Math.min(displayArea.x + displayArea.width - contentSize.width,
-        Math.max(displayArea.x, fromRect.x + (fromRect.width - contentSize.width) / 2)),
-      fromRect.y - contentSize.height - arrowSize.height);
+        Math.min(displayArea.x + displayArea.width - contentSize.width,
+            Math.max(displayArea.x, fromRect.x + (fromRect.width - contentSize.width) / 2)),
+        fromRect.y - contentSize.height - arrowSize.height);
     var anchorPoint = new Point(fromRect.x + fromRect.width / 2.0, fromRect.y);
 
     return {
@@ -112,9 +113,9 @@ var Popover = React.createClass({
   },
   computeBottomGeometry({displayArea, fromRect, contentSize, arrowSize}) {
     var popoverOrigin = new Point(
-      Math.min(displayArea.x + displayArea.width - contentSize.width,
-        Math.max(displayArea.x, fromRect.x + (fromRect.width - contentSize.width) / 2)),
-      fromRect.y + fromRect.height + arrowSize.height);
+        Math.min(displayArea.x + displayArea.width - contentSize.width,
+            Math.max(displayArea.x, fromRect.x + (fromRect.width - contentSize.width) / 2)),
+        fromRect.y + fromRect.height + arrowSize.height);
     var anchorPoint = new Point(fromRect.x + fromRect.width / 2.0, fromRect.y + fromRect.height);
 
     return {
@@ -125,8 +126,8 @@ var Popover = React.createClass({
   },
   computeLeftGeometry({displayArea, fromRect, contentSize, arrowSize}) {
     var popoverOrigin = new Point(fromRect.x - contentSize.width - arrowSize.width,
-      Math.min(displayArea.y + displayArea.height - contentSize.height,
-        Math.max(displayArea.y, fromRect.y + (fromRect.height - contentSize.height) / 2)));
+        Math.min(displayArea.y + displayArea.height - contentSize.height,
+            Math.max(displayArea.y, fromRect.y + (fromRect.height - contentSize.height) / 2)));
     var anchorPoint = new Point(fromRect.x, fromRect.y + fromRect.height / 2.0);
 
     return {
@@ -137,8 +138,8 @@ var Popover = React.createClass({
   },
   computeRightGeometry({displayArea, fromRect, contentSize, arrowSize}) {
     var popoverOrigin = new Point(fromRect.x + fromRect.width + arrowSize.width,
-      Math.min(displayArea.y + displayArea.height - contentSize.height,
-        Math.max(displayArea.y, fromRect.y + (fromRect.height - contentSize.height) / 2)));
+        Math.min(displayArea.y + displayArea.height - contentSize.height,
+            Math.max(displayArea.y, fromRect.y + (fromRect.height - contentSize.height) / 2)));
     var anchorPoint = new Point(fromRect.x + fromRect.width, fromRect.y + fromRect.height / 2.0);
 
     return {
@@ -215,13 +216,13 @@ var Popover = React.createClass({
   getTranslateOrigin() {
     var {contentSize, popoverOrigin, anchorPoint} = this.state;
     var popoverCenter = new Point(popoverOrigin.x + contentSize.width / 2,
-      popoverOrigin.y + contentSize.height / 2);
+        popoverOrigin.y + contentSize.height / 2);
     return new Point(anchorPoint.x - popoverCenter.x, anchorPoint.y - popoverCenter.y);
   },
   componentWillReceiveProps(nextProps) {
     var willBeVisible = nextProps.isVisible;
     var {
-      isVisible,
+        isVisible,
     } = this.props;
 
     if (willBeVisible !== isVisible) {
@@ -240,7 +241,7 @@ var Popover = React.createClass({
     this.setState({isTransitioning: true});
   },
   _startDefaultAnimation({show, doneCallback}) {
-    var animDuration = 150;
+    var animDuration = 300;
     var values = this.state.defaultAnimatedValues;
     var translateOrigin = this.getTranslateOrigin();
 
@@ -325,7 +326,7 @@ var Popover = React.createClass({
   },
   render() {
     if (!this.props.isVisible && !this.state.isTransitioning) {
-        return null;
+      return null;
     }
 
     var {popoverOrigin, placement} = this.state;
@@ -341,22 +342,22 @@ var Popover = React.createClass({
     var arrowTransform = (StyleSheet.flatten(arrowStyle).transform || []).slice(0);
     arrowTransform.unshift({rotate: this.getArrowRotation(placement)});
     arrowStyle = [...arrowStyle, {transform: arrowTransform}];
-
+    var contentMarginRight=this.props.contentMarginRight? this.props.contentMarginRight:0;
     return (
-      <TouchableWithoutFeedback onPress={this.props.onClose}>
-        <View style={[styles.container, contentSizeAvailable && styles.containerVisible ]}>
-          <Animated.View style={[styles.background, ...extendedStyles.background]}/>
-          <Animated.View style={[styles.popover, {
-            top: popoverOrigin.y,
-            left: popoverOrigin.x,
+        <TouchableWithoutFeedback onPress={this.props.onClose}>
+          <View style={[styles.container, contentSizeAvailable && styles.containerVisible ]}>
+            <Animated.View style={[styles.background, ...extendedStyles.background]}/>
+            <Animated.View style={[styles.popover, {
+              top: popoverOrigin.y,
+              left: popoverOrigin.x-contentMarginRight,
             }, ...extendedStyles.popover]}>
-            {/* <Animated.View style={arrowStyle}/> */}
-            <Animated.View ref='content' onLayout={this.measureContent} style={contentStyle}>
-              {this.props.children}
+              {/*<Animated.View style={arrowStyle}/> 隐藏箭头*/}
+              <Animated.View ref='content' onLayout={this.measureContent} style={[contentStyle,this.props.contentStyle,]}>
+                {this.props.children}
+              </Animated.View>
             </Animated.View>
-          </Animated.View>
-        </View>
-      </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
     );
   }
 });
@@ -381,20 +382,20 @@ var styles = StyleSheet.create({
     left: 0,
     right: 0,
     position: 'absolute',
-    // backgroundColor: 'rgba(0,0,0,0.5)',
+    //隐藏背景 backgroundColor: 'rgba(0,0,0,0.5)',
   },
   popover: {
     backgroundColor: 'transparent',
     position: 'absolute',
-    shadowColor: 'black',
-    shadowOffset: {width: 0, height: 2},
-    shadowRadius: 2,
-    shadowOpacity: 0.8,
   },
   content: {
     borderRadius: 3,
     padding: 6,
     backgroundColor: '#fff',
+    shadowColor: 'gray',
+    shadowOffset: {width: 2, height: 2},
+    shadowRadius: 2,
+    shadowOpacity: 0.8,
   },
   arrow: {
     position: 'absolute',
