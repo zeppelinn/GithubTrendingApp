@@ -48,6 +48,27 @@ export default class ViewUtils{
             </TouchableHighlight>
         );
     }
+
+    static getRightButton = (title, callBack) => {
+        return <TouchableOpacity
+            style={{alignItems:'center'}}
+            onPress={callBack}>
+            <View style={{marginRight:10}} >
+                <Text style={{fontSize: 20, color:'#FFFFFF'}} >{title}</Text>
+            </View>
+        </TouchableOpacity>
+    }
+
+    /**
+     * 弹出更多菜单按钮
+     */
+    static getMoreButton = (callBack) => {
+        return <TouchableHighlight ref='moreMenuButton' style={{padding:5}} onPress={callBack} underlayColor={'transparent'}>
+            <View style={{paddingRight:8}} >
+                <Image style={{width:30, height:30}} source={require('../../../res/images/ic_more_vert_white_48pt.png')} />
+            </View>
+        </TouchableHighlight>
+    }
 }
 
 const styles = StyleSheet.create({

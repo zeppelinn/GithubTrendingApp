@@ -30,6 +30,7 @@ export default class HomePage extends Component {
   }
 
   onRestart = (selectedTab) => {
+    console.log('selectedTab---->', selectedTab)
     this.props.navigator.resetTo({
       component:HomePage,
       params:{

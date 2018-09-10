@@ -6,7 +6,8 @@ import {
     Text,
     ScrollView,
     Image,
-    Alert
+    Alert,
+    DeviceEventEmitter,
 } from 'react-native';
 import NavigationBar from '../../common/NavigationBar';
 import ViewUtils from '../util/ViewUtils'
@@ -14,6 +15,7 @@ import LanguageDao, {FLAG_LANGUAGE} from '../../expend/dao/LanguageDao';
 import CheckBox from 'react-native-check-box';
 import ArrayUtils from '../util/ArrayUtils';
 import {MORE_MENU} from '../../common/MoreMenu'
+import { ACTION_HOME, FLAG_TAB } from '../HomePage';
 
 export default class CustomTagsPage extends Component {
     constructor(props){
@@ -90,7 +92,9 @@ export default class CustomTagsPage extends Component {
             }
         }
         this.languageDao.save(this.state.dataArray);
-        this.props.navigator.pop();
+        var jumpToType = this.props.flag === FLAG_LANGUAGE.flag_key ? FLAG_TAB.flag_popularTab : FLAG_TAB.flag_trendingTab
+        DeviceEventEmitter.emit('ACTION_HOME', ACTION_HOME.A_RESTART, {selectedTab:jumpTab});
+        // this.props.navigator.pop();
     }
 
     // 处理每个checkbox的点击事件，更新每个checkbox的isChecked状态

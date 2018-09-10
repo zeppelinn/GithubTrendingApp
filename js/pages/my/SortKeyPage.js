@@ -6,13 +6,15 @@ import {
     TouchableHighlight,
     Image,
     TouchableOpacity,
-    Alert
+    Alert,
+    DeviceEventEmitter
 } from 'react-native';
 import LanguageDao, { FLAG_LANGUAGE } from '../../expend/dao/LanguageDao';
 import ArrayUtils from '../util/ArrayUtils'
 import SortableListView from 'react-native-sortable-listview'
 import NavigationBar from '../../common/NavigationBar'
 import ViewUtils from '../util/ViewUtils'
+import { FLAG_TAB, ACTION_HOME } from '../HomePage';
 
 export default class SortKeyPage extends Component {
 
@@ -79,7 +81,9 @@ export default class SortKeyPage extends Component {
         }else{
             this.getSortedResult();
             this.languageDao.save(this.sortResultArray);
-            this.props.navigator.pop();
+            // this.props.navigator.pop();
+            let jumpTab = this.props.flag === FLAG_LANGUAGE.flag_key ? FLAG_TAB.flag_popularTab : FLAG_TAB.flag_trendingTab
+            DeviceEventEmitter.emit('ACTION_HOME', ACTION_HOME.A_RESTART, {selectedTab:jumpTab});
         }
     }
 

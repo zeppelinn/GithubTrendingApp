@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 
 import NavigationBar from '../common/NavigationBar';
-import HomePage from './HomePage';
+import HomePage, { FLAG_TAB } from './HomePage';
 import DataRepository, {FLAG_STORAGE} from '../expend/dao/DataRepository'
 import ScrollableTabView, { ScrollableTabBar } from 'react-native-scrollable-tab-view';
 import TrendingCell from '../common/TrendingCell'
@@ -23,6 +23,8 @@ import ProjectModel from '../model/ProjectModel';
 import FavoriteDao from '../expend/dao/FavoriteDao';
 import Utils from '../pages/util/Utils'
 import ActionUtils from './util/ActionUtils';
+import ViewUtils from './util/ViewUtils';
+import MoreMenu, { MORE_MENU } from '../common/MoreMenu';
 var favoriteDao = new FavoriteDao(FLAG_STORAGE.flag_trending);
 var dataRepository = new DataRepository(FLAG_STORAGE.flag_trending) //实例化数据请求对象
 var timeSpanTextArray = [new TimeSpan('今天', '今 天', 'since=daily'), new TimeSpan('本周','本 周', 'since=weekly'), new TimeSpan('本月','本 月', 'since=monthly')];
@@ -99,6 +101,22 @@ export default class TrendingPage extends Component {
         })
     }
 
+    renderRightButton = () => {
+        return <View style={{flexDirection:'row'}} >
+            {ViewUtils.getMoreButton(() => this.refs.moreMenu.open())}
+        </View>
+    }
+
+    renderMoreMenuView = () => {
+        let params = {...this.props, fromPage:FLAG_TAB.flag_popularTab}
+        return <MoreMenu
+            ref='moreMenu'
+            {...params}
+            menus={[MORE_MENU.CUSTOM_LANGUAGE, MORE_MENU.SORT_LANGUAGE]}
+            anchorView={() => this.refs.moreMenuButton}
+        />
+    }
+
     render() {
         let content = this.state.dataArray.length !== 0 ? <ScrollableTabView 
                         tabBarBackgroundColor="#2196F3"
@@ -133,9 +151,11 @@ export default class TrendingPage extends Component {
                         barStyle:"light-content"
                     }}
                     titleView={this.renderTitleView()}
+                    rightButton={this.renderRightButton()}
                 />
                 {content}
                 {timeSpanView}
+                {this.renderMoreMenuView()}
             </View>
         )
     }
